@@ -1,0 +1,3 @@
+/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lecture01/c_version/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lecture01/c_version/cmake-build-debug/CMakeFiles/c_version.dir
+/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lecture01/c_version/cmake-build-debug/CMakeFiles/edit_cache.dir

@@ -1,0 +1,1 @@
+/usr/bin/gcc -g   CMakeFiles/c_version.dir/main.c.o  -o c_version 
