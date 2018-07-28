@@ -27,19 +27,18 @@ void fatal(char*); // Display an error message and then exit
 
 int main()
 {
+    /* Change the directory back one where the text file is */
+    chdir("/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lab01/");
     /* FILE IO */
     FILE *fptr;
     char file_buffer[200], word[WORD_SIZE];
 
-    /* Change the directory back one where the text file is */
-    char cwd[1024];
-    chdir("/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lab01/");
-    getcwd(cwd, sizeof(cwd));
+
 
     // display a prompt for the file name and print to stdout file to open
     // printf("Input file name: ");
     // scanf("%s", file_buffer);
-    /* TODO: Testing */
+    // TODO: Testing
     strcpy(file_buffer, "Ex1.txt");
     printf("Opening file: %s\n\n", file_buffer);
 
@@ -54,6 +53,7 @@ int main()
       fscanf(fptr, "%s", word);
       push(word);
     } while(fscanf(fptr, "%s", word) != EOF);
+
     fclose(fptr);
 
     while(!isEmpty()) printf("Popping top word: %s\n", pop());
