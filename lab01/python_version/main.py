@@ -8,16 +8,12 @@ import os
 
 # Stack Implementation
 _STACK = []
-_CTR = 0
 
 
 def read_file():
     # Change the directory back one where the text file is
     os.chdir("../")
-
-    # file = input("Input file to read: ")
-    # TODO: TESTING
-    file = "Ex1.txt"
+    file = input("Input file to read: ")
 
     with open(file, "r") as fin:
         if fin.closed:
@@ -26,11 +22,7 @@ def read_file():
         raw_input = fin.read().split()
         for line in raw_input:
             push(line)
-
     fin.close()
-
-    for word in _STACK:
-        print("{}".format(word))
 
     print("\n|===== POPPING WORDS =====|")
     while not isempty():
@@ -38,26 +30,19 @@ def read_file():
 
 
 def push(elem):
-    global _CTR
-    _CTR += 1
     _STACK.append(elem)
 
 
 def top():
-    return _STACK[_CTR - 1]
+    return _STACK[len(_STACK) - 1]
 
 
 def isempty():
-    return _CTR == 0
+    return len(_STACK) == 0
 
 
 def pop():
-    global _CTR
-    if isempty():
-        return None
-    else:
-        _CTR -= 1
-        return _STACK[_CTR]
+    return _STACK.pop() if not isempty() else None
 
 
 if __name__ == "__main__":
