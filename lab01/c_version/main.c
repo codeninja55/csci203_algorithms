@@ -14,6 +14,7 @@
 
 #define STACK_SIZE 50
 #define WORD_SIZE 20
+#define LINE_SIZE 200
 
 /* Stack implementation */
 char STACK[WORD_SIZE][STACK_SIZE];
@@ -23,17 +24,17 @@ void push(char*);
 char* pop();
 bool isEmpty();
 char* top();
-void fatal(char*); // Display an error message and then exit
+void fatal(char*);  // Display an error message and then exit
 
 int main()
 {
     /* Change the directory back one where the text file is */
-    chdir("/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lab01/");
+    // chdir("/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lab01/");
+    chdir("../../");
+
     /* FILE IO */
     FILE *fptr;
-    char file_buffer[200], word[WORD_SIZE];
-
-
+    char file_buffer[200], word[WORD_SIZE], line[LINE_SIZE];
 
     // display a prompt for the file name and print to stdout file to open
     // printf("Input file name: ");
@@ -49,14 +50,11 @@ int main()
     }
 
     // Read in a word from the file until EOF and then put in stack
-    do {
-      fscanf(fptr, "%s", word);
-      push(word);
-    } while(fscanf(fptr, "%s", word) != EOF);
+    while(fscanf(fptr, "%s", word) == 1) push(word);
 
     fclose(fptr);
 
-    while(!isEmpty()) printf("Popping top word: %s\n", pop());
+    while(!isEmpty()) printf("%s ", pop());
 
     return 0;
 }
@@ -78,6 +76,33 @@ char* top() { return STACK[CTR-1]; }
 // Returns true if the CTR is 0
 bool isEmpty() { return (CTR==0); }
 
+// Split an array cstring into words and return a array of words
+/*char* split(const char* line)
+{
+    int i = 0, output_ctr = 0;
+    char *word, *output[20];
+    word = (char *) ec_malloc(sizeof(char));
+
+    // for(int i=0; i < strlen(line); i++) {
+    while(line[i] != '\n') {
+        if(line[i] == ' ') {
+            word[i] = '\0';
+            output[output_ctr] = word;
+            printf("%s ", output[output_ctr]);
+            output_ctr++;
+            free(word);
+            word = (char *) ec_malloc(sizeof(char));
+        } else {
+            word[i] = line[i];
+            word = (char *) realloc(word, strlen(word) + sizeof(char));
+        }
+        printf("%d:%c, ", i, line[i]);
+        i++;
+    }
+
+    // return something
+}*/
+
 // A function to display an error message and then exit
 void fatal(char *message)
 {
@@ -90,12 +115,10 @@ void fatal(char *message)
 }
 
 // An error-checked malloc() wrapper function
-/*
-void *ec_malloc(unsigned int size)
-{
+void *ec_malloc(unsigned int size) {
     void *ptr;
     ptr = malloc(size);
     if(ptr == NULL)
         fatal("in ec_malloc() on memory allocation");
     return ptr;
-}*/
+}
