@@ -52,6 +52,12 @@ int main()
     // Read in a word from the file until EOF and then put in stack
     while(fscanf(fptr, "%s", word) == 1) push(word);
 
+    // do {
+    //     fscanf(fptr, "%s", word);
+    //     printf("%s ", word);
+    //     push(word);
+    // } while (fscanf(fptr, "%s", word) == 1);
+
     fclose(fptr);
 
     while(!isEmpty()) printf("%s ", pop());
@@ -65,8 +71,8 @@ char* pop()
 {
   if(isEmpty()) return NULL;
   else {
-    CTR--;
-    return STACK[CTR];
+      CTR--;
+      return STACK[CTR];
   }
 }
 
@@ -74,7 +80,7 @@ char* pop()
 char* top() { return STACK[CTR-1]; }
 
 // Returns true if the CTR is 0
-bool isEmpty() { return (CTR==0); }
+bool isEmpty() { return CTR==0; }
 
 // Split an array cstring into words and return a array of words
 /*char* split(const char* line)
