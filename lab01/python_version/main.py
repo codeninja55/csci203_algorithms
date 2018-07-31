@@ -24,10 +24,6 @@ def read_file():
             push(line)
     fin.close()
 
-    print("\n|===== POPPING WORDS =====|")
-    while not isempty():
-        print("Popping top word: {}".format(pop()))
-
 
 def push(elem):
     _STACK.append(elem)
@@ -47,3 +43,6 @@ def pop():
 
 if __name__ == "__main__":
     read_file()
+    print("\n|===== POPPING WORDS =====|")
+    while not isempty():
+        print("{} ".format(pop()))
