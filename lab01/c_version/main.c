@@ -14,7 +14,6 @@
 
 #define STACK_SIZE 50
 #define WORD_SIZE 20
-#define LINE_SIZE 200
 
 /* Stack implementation */
 char STACK[WORD_SIZE][STACK_SIZE];
@@ -30,11 +29,11 @@ int main()
 {
     /* Change the directory back one where the text file is */
     // chdir("/mnt/c/Users/codeninja/Dropbox/uow_csci203/csci203_algorithms/lab01/");
-    chdir("../../");
+    chdir("../");
 
     /* FILE IO */
     FILE *fptr;
-    char file_buffer[200], word[WORD_SIZE], line[LINE_SIZE];
+    char file_buffer[200], word[WORD_SIZE];
 
     // display a prompt for the file name and print to stdout file to open
     // printf("Input file name: ");
@@ -50,13 +49,11 @@ int main()
     }
 
     // Read in a word from the file until EOF and then put in stack
-    while(fscanf(fptr, "%s", word) == 1) push(word);
-
-    // do {
-    //     fscanf(fptr, "%s", word);
-    //     printf("%s ", word);
-    //     push(word);
-    // } while (fscanf(fptr, "%s", word) == 1);
+    while(fscanf(fptr, "%s", word) == 1) {
+        // if the read fails, break the loop
+        if (ferror(fptr)) break;
+        push(word);
+    }
 
     fclose(fptr);
 
