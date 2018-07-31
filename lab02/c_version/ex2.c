@@ -22,21 +22,22 @@ int CTR = 0;
 
  int main()
 {
-     FILE *fd;
-     char filename[200];
-     int *node;
-     node = (int *) ec_malloc(sizeof(int));
+    FILE *fd;
+    char filename[200];
+    int *node;
+    node = (int *) ec_malloc(sizeof(int));
 
-     char pwd[100];
-     chdir("../");
-     getcwd(pwd, sizeof(pwd));
-     printf("PWD: %s\n\n", pwd);
+    char pwd[100];
+    // Set config directory to lab02 folder and chdir() not needed
+    // chdir("../../lab02");
+    getcwd(pwd, sizeof(pwd));
+    printf("PWD: %s\n\n", pwd);
 
-     // TODO: TESTING ONLY
-     strcpy(filename, "Ex2.txt");
-     printf("Opening file: %s\n\n", filename);
+    // TODO: TESTING ONLY
+    strcpy(filename, "Ex2.txt");
+    printf("Opening file: %s/%s\n\n", pwd, filename);
 
-     if ((fd = fopen(filename, "r")) == NULL) {
+    if ((fd = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Failed to open file [ %s ]\n", strerror(1));
         exit(1);
      }
