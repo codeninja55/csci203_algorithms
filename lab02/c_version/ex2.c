@@ -1,7 +1,9 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err34-c"
 /*********************************************************************
  * CSCI203 - Exercise 2
  * main.c - main() for exercise 1 execution
- * Dinh Che | dbac496 | Last modified 2018.07.31
+ * Dinh Che | dbac496 | Last modified 2018.08.01
  * Author: codeninja55
  *********************************************************************/
 
@@ -11,16 +13,17 @@
 #include <string.h>
 #include "helper.h"
 
+void makeheap();
 void siftup(int*, int);
 void siftdown(int*, int);
-void swap(int, int);
+void swap(int*, int*);
 
 /* Heap implementation */
 int HEAP[100];
-int CTR = 0;
+int N_CTR = 0;
 
 
- int main()
+int main()
 {
     FILE *fd;
     char filename[200];
@@ -29,7 +32,6 @@ int CTR = 0;
 
     char pwd[100];
     // Set config directory to lab02 folder and chdir() not needed
-    // chdir("../../lab02");
     getcwd(pwd, sizeof(pwd));
     printf("PWD: %s\n\n", pwd);
 
@@ -38,44 +40,72 @@ int CTR = 0;
     printf("Opening file: %s/%s\n\n", pwd, filename);
 
     if ((fd = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, "Failed to open file [ %s ]\n", strerror(1));
+        fprintf(stderr, "[DEBUG]: Failed to open file [ %s ]\n", strerror(1));
         exit(1);
-     }
+    }
+
+    printf("\n==========| PRINTING READ ELEMENTS (FIRST 5) |==========\n");
 
     while(fscanf(fd, "%d", node) == 1) {
         if (ferror(fd)) break; // if the read fails, break the loop
-        printf("%d\n", *node);
-    }
+        if (N_CTR <= 5) printf("[%d]: %d ", N_CTR, *node);
 
-     return 0;
+        // TODO: Testing Ian's pseudocode version
+        // HEAP[N_CTR++] = *node;
+
+        // TODO: codeninja55 version
+        HEAP[N_CTR] = *node;
+        siftup(HEAP, N_CTR);
+        N_CTR++;
+    }
+    fclose(fd);
+
+    // TODO: Testing Ian's pseudocode version
+    printf("\n==========| N_CTR |==========| %d\n\n", N_CTR);
+    // makeheap();
+
+    printf("\n==========| PRINTING HEAP ELEMENTS (FIRST 5) |==========\n");
+    for (int i = 0; i <= 5; i++) printf("[%d]: %d ", i, HEAP[i]);
+
+    return 0;
+}
+
+void makeheap()
+{
+    // TODO: This is not correct from following pseudocode
+    for (int i = N_CTR / 2; i <= 1; i--) {
+        siftdown(HEAP, i);
+    }
 }
 
 void siftup(int *heap, int i)
 {
-     // Move element i up to its correct position
-     if (i==0) return;
-     int parent = i/2; // integer division
+     // move element i up to its correct position
+     if (i==0) return;  // no children
+     int parent = i/2;  // integer division
      if (heap[parent] > heap[i]) return;
      else {
-         swap(heap[i], heap[parent]);
+         swap(&heap[i], &heap[parent]);
          siftup(heap, parent);
      }
 }
 
-void siftdown(int * heap, int i)
+void siftdown(int *heap, int i)
 {
     // move element i down to its correct position
     int child = i * 2;
-    if (heap[child] < heap[child + 1]) child += 1;
+    if (heap[child] < heap[child + 1]) child += 1;  // Look for larger of 2 children
     if (heap[i] < heap[child]) {
-        swap(heap[i], heap[child]);
+        swap(&heap[i], &heap[child]);
         siftdown(heap, child);
     }
 }
 
-void swap(int i, int p)
+void swap(int *v1, int *v2)
 {
-     int temp = i;
-     i = p;
-     p = temp;
+     int temp = *v1;
+     *v1 = *v2;
+     *v2 = temp;
 }
+
+#pragma clang diagnostic pop
