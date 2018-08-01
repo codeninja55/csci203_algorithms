@@ -51,18 +51,18 @@ int main()
         if (N_CTR <= 5) printf("[%d]: %d ", N_CTR, *node);
 
         // TODO: Testing Ian's pseudocode version
-        // HEAP[N_CTR++] = *node;
+        HEAP[N_CTR++] = *node;
 
         // TODO: codeninja55 version
-        HEAP[N_CTR] = *node;
-        siftup(HEAP, N_CTR);
-        N_CTR++;
+        // HEAP[N_CTR] = *node;
+        // siftup(HEAP, N_CTR);
+        // N_CTR++;
     }
     fclose(fd);
 
     // TODO: Testing Ian's pseudocode version
     printf("\n==========| N_CTR |==========| %d\n\n", N_CTR);
-    // makeheap();
+    makeheap();
 
     printf("\n==========| PRINTING HEAP ELEMENTS (FIRST 5) |==========\n");
     for (int i = 0; i <= 5; i++) printf("[%d]: %d ", i, HEAP[i]);
@@ -72,8 +72,8 @@ int main()
 
 void makeheap()
 {
-    // TODO: This is not correct from following pseudocode
-    for (int i = N_CTR / 2; i <= 1; i--) {
+    // The pseudocode shows this but the impl is inefficient
+    for (int i = N_CTR / 2; i >= 0; i--) {
         siftdown(HEAP, i);
     }
 }
