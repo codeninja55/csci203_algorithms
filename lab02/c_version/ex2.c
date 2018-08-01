@@ -2,7 +2,7 @@
 #pragma ide diagnostic ignored "cert-err34-c"
 /*********************************************************************
  * CSCI203 - Exercise 2
- * main.c - main() for exercise 1 execution
+ * ex2.c - main() for exercise 2 execution
  * Dinh Che | dbac496 | Last modified 2018.08.01
  * Author: codeninja55
  *********************************************************************/
@@ -15,8 +15,13 @@
 
 void makeheap();
 void siftup(int*, int);
+void recursive_siftup(int*, int);
 void siftdown(int*, int);
+void recursive_siftdown(int*, int);
 void swap(int*, int*);
+int get_parent(int);
+int get_left(int);
+int get_right(int);
 
 /* Heap implementation */
 int HEAP[100];
@@ -48,24 +53,23 @@ int main()
 
     while(fscanf(fd, "%d", node) == 1) {
         if (ferror(fd)) break; // if the read fails, break the loop
-        if (N_CTR <= 5) printf("[%d]: %d ", N_CTR, *node);
+        if (N_CTR < 5) printf("[%d]: %d ", N_CTR + 1, *node);
 
         // TODO: Testing Ian's pseudocode version
-        HEAP[N_CTR++] = *node;
+        // HEAP[N_CTR++] = *node;
 
         // TODO: codeninja55 version
-        // HEAP[N_CTR] = *node;
+        HEAP[N_CTR] = *node;
+        recursive_siftup(HEAP, N_CTR);
         // siftup(HEAP, N_CTR);
-        // N_CTR++;
+        N_CTR++;
     }
     fclose(fd);
 
-    // TODO: Testing Ian's pseudocode version
-    printf("\n==========| N_CTR |==========| %d\n\n", N_CTR);
-    makeheap();
+    // makeheap();
 
     printf("\n==========| PRINTING HEAP ELEMENTS (FIRST 5) |==========\n");
-    for (int i = 0; i <= 5; i++) printf("[%d]: %d ", i, HEAP[i]);
+    for (int i = 0; i < 5; i++) printf("[%d]: %d ", i + 1, HEAP[i]);
 
     return 0;
 }
@@ -78,11 +82,27 @@ void makeheap()
     }
 }
 
-void siftup(int *heap, int i)
+void siftup(int *T, int i)
+{
+    if (i == 0) return;
+    int parent = get_parent(i);
+    if (T[parent] > T[i]) return;
+    else {
+        while (parent >= 0) {
+            if (T[i] > T[parent]) {
+                swap(&T[parent], &T[i]);
+                parent = get_parent(parent);
+            }
+            else return;
+        }
+    }
+}
+
+void recursive_siftup(int *heap, int i)
 {
      // move element i up to its correct position
      if (i==0) return;  // no children
-     int parent = i/2;  // integer division
+     int parent = get_parent(i);  // integer division
      if (heap[parent] > heap[i]) return;
      else {
          swap(&heap[i], &heap[parent]);
@@ -92,9 +112,14 @@ void siftup(int *heap, int i)
 
 void siftdown(int *heap, int i)
 {
+
+}
+
+void recursive_siftdown(int *heap, int i)
+{
     // move element i down to its correct position
-    int child = i * 2;
-    if (heap[child] < heap[child + 1]) child += 1;  // Look for larger of 2 children
+    int child = get_left(i);
+    if (heap[child] < heap[get_right(i)]) child += 1;  // Look for larger of 2 children
     if (heap[i] < heap[child]) {
         swap(&heap[i], &heap[child]);
         siftdown(heap, child);
@@ -107,5 +132,9 @@ void swap(int *v1, int *v2)
      *v1 = *v2;
      *v2 = temp;
 }
+
+int get_parent(int i) { return (i / 2); }
+int get_left(int i) { return (2 * i); }
+int get_right(int i) { return (2 * i) + 1; }
 
 #pragma clang diagnostic pop
