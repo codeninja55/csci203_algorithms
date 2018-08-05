@@ -32,8 +32,8 @@ int main()
 {
     FILE *fd;
     char filename[200];
-    int *node;
-    node = (int *) ec_malloc(sizeof(int));
+    unsigned int *node;
+    node = (unsigned int *) ec_malloc(sizeof(unsigned int));
 
     char pwd[100];
     // Set config directory to lab02 folder and chdir() not needed
@@ -49,7 +49,7 @@ int main()
         exit(1);
     }
 
-    printf("\n==========| PRINTING READ ELEMENTS (FIRST 5) |==========\n");
+    printf("==========| PRINTING READ ELEMENTS (FIRST 5) |==========\n");
 
     while(fscanf(fd, "%d", node) == 1) {
         if (ferror(fd)) break; // if the read fails, break the loop
@@ -100,11 +100,11 @@ void recursive_siftup(int *heap, int i)
 {
      // move element i up to its correct position
      if (i==0) return;  // no children
-     int parent = get_parent(i);  // integer division
+     int parent = i / 2;  // integer division
      if (heap[parent] > heap[i]) return;
      else {
          swap(&heap[i], &heap[parent]);
-         siftup(heap, parent);
+         recursive_siftup(heap, parent);
      }
 }
 
@@ -116,11 +116,11 @@ void siftdown(int *heap, int i)
 void recursive_siftdown(int *heap, int i)
 {
     // move element i down to its correct position
-    int child = get_left(i);
+    int child = i * 2;
     if (heap[child] < heap[get_right(i)]) child += 1;  // Look for larger of 2 children
     if (heap[i] < heap[child]) {
         swap(&heap[i], &heap[child]);
-        siftdown(heap, child);
+        recursive_siftdown(heap, child);
     }
 }
 
@@ -131,8 +131,9 @@ void swap(int *v1, int *v2)
      *v2 = temp;
 }
 
-int get_parent(int i) { return (i / 2); }
-int get_left(int i) { return (2 * i); }
-int get_right(int i) { return (2 * i) + 1; }
+// TODO: Need to fix these to find the right index number
+int get_parent(int i) { return ((i+1) / 2) - 1; }
+int get_left(int i) { return ((i+1) * 2) - 1; }
+int get_right(int i) { return (((i+1) * 2) + 1) - 1; }
 
 #pragma clang diagnostic pop
