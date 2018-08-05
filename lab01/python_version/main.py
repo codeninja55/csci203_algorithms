@@ -1,6 +1,6 @@
 #######################################################################
 # CSCI203 - Exercise 1
-# main.py - main() for exercise 1 execution
+# ex2.py - main() for exercise 1 execution
 # Dinh Che | dbac496 | Last modified 2018.07.29
 # Author: codeninja55
 #######################################################################
