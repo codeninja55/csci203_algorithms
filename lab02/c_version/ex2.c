@@ -77,9 +77,7 @@ int main()
 void makeheap()
 {
     // The pseudocode shows this but the impl is inefficient
-    for (int i = N_CTR / 2; i >= 0; i--) {
-        siftdown(HEAP, i);
-    }
+    for (int i = N_CTR / 2; i >= 0; i--) siftdown(HEAP, i);
 }
 
 void siftup(int *T, int i)
