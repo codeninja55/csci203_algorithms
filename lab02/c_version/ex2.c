@@ -38,7 +38,7 @@ int main()
     char pwd[100];
     // Set config directory to lab02 folder and chdir() not needed
     getcwd(pwd, sizeof(pwd));
-    printf("PWD: %s\n\n", pwd);
+    printf("\nPWD: %s\n", pwd);
 
     // TODO: TESTING ONLY
     strcpy(filename, "Ex2.txt");
