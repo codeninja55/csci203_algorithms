@@ -14,15 +14,15 @@ N_CTR = 0
 
 
 def get_parent(i=0):
-    return floor(i / 2)
+    return floor((i + 1) / 2)
 
 
 def get_left(i=0):
-    return i * 2
+    return (i + 1) * 2
 
 
 def get_right(i=0):
-    return (i * 2) + 1
+    return ((i + 1) * 2) + 1
 
 
 def swap(idx1, idx2):
@@ -38,16 +38,17 @@ def siftup(t, i=0):
     if t[parent] > t[i]:
         return
 
-    while parent >= 0:
+    while (parent - 1) >= 0:
         if t[i] > t[parent]:
             swap(i, parent)
             parent = get_parent(parent)
         else:
             return
 
+
 def recursive_siftdown(t, i):
-    child = get_left(i)
-    if t[child] < t[get_right(i)]:
+    child = i * 2
+    if t[child] < t[(i * 2) + 1]:
         child += 1
     if t[i] < t[child]:
         swap(i, child)
@@ -58,9 +59,7 @@ def recursive_siftup(t, i):
     # Move element i up to its correct position
     if i == 0:
         return
-
-    parent = get_parent(i)
-
+    parent = i // 2
     if t[parent] > t[i]:
         return
     else:
@@ -78,8 +77,8 @@ def makeheap():
 def heappush(elem):
     global N_CTR
     HEAP.append(int(elem))
-    # recursive_siftup(HEAP, N_CTR)
-    siftup(HEAP, N_CTR)
+    recursive_siftup(HEAP, N_CTR)
+    # siftup(HEAP, N_CTR)
     N_CTR += 1
 
 
@@ -92,6 +91,7 @@ def read_file(filename="Ex2.txt"):
             for line in fin:
                 print(line.strip(), end=' ')
                 heappush(line.strip())
+            print('\n\n')
         fin.close()
 
 

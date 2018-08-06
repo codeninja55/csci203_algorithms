@@ -108,10 +108,7 @@ void recursive_siftup(int *heap, int i)
      }
 }
 
-void siftdown(int *heap, int i)
-{
-
-}
+void siftdown(int *heap, int i) {  }
 
 void recursive_siftdown(int *heap, int i)
 {
