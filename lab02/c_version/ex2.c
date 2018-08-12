@@ -32,8 +32,8 @@ int main()
 {
     FILE *fd;
     char filename[200];
-    unsigned int *node;
-    node = (unsigned int *) ec_malloc(sizeof(unsigned int));
+    unsigned int node;
+//    node = (unsigned int *) ec_malloc(sizeof(unsigned int));
 
     char pwd[100];
     // Set config directory to lab02 folder and chdir() not needed
@@ -51,24 +51,27 @@ int main()
 
     printf("==========| PRINTING READ ELEMENTS (FIRST 5) |==========\n");
 
-    while(fscanf(fd, "%d", node) == 1) {
+    while(fscanf(fd, "%d", &node) == 1) {
         if (ferror(fd)) break; // if the read fails, break the loop
-        if (N_CTR < 5) printf("[%d]: %d ", N_CTR + 1, *node);
+        if (N_CTR < 5) printf("[%d]: %d ", N_CTR + 1, node);
 
         // TODO: Testing Ian's pseudocode version
-        // HEAP[N_CTR++] = *node;
+        HEAP[N_CTR] = node;
 
         // TODO: codeninja55 version
-        HEAP[N_CTR] = *node;
+        // HEAP[N_CTR] = *node;
         recursive_siftup(HEAP, N_CTR);
         // siftup(HEAP, N_CTR);
         N_CTR++;
     }
     fclose(fd);
 
-    // makeheap();
+    printf("\n==========| PRINTING MIN HEAP ELEMENTS (FIRST 5) |==========\n");
+    for (int i = 0; i < 5; i++) printf("[%d]: %d ", i + 1, HEAP[i]);
 
-    printf("\n==========| PRINTING HEAP ELEMENTS (FIRST 5) |==========\n");
+    makeheap();
+
+    printf("\n==========| PRINTING MAX HEAP ELEMENTS (FIRST 5) |==========\n");
     for (int i = 0; i < 5; i++) printf("[%d]: %d ", i + 1, HEAP[i]);
 
     return 0;
@@ -77,7 +80,7 @@ int main()
 void makeheap()
 {
     // The pseudocode shows this but the impl is inefficient
-    for (int i = N_CTR / 2; i >= 0; i--) siftdown(HEAP, i);
+    for (int i = (N_CTR / 2) - 1; i >= 0; i--) recursive_siftdown(HEAP, i);
 }
 
 void siftup(int *T, int i)
@@ -99,25 +102,34 @@ void siftup(int *T, int i)
 void recursive_siftup(int *heap, int i)
 {
      // move element i up to its correct position
-     if (i==0) return;  // no children
-     int parent = i / 2;  // integer division
-     if (heap[parent] > heap[i]) return;
-     else {
+     if (i == 0) return;  // no children
+     int parent = (i - 1) / 2;  // integer division
+     if (heap[parent] > heap[i]) {
          swap(&heap[i], &heap[parent]);
          recursive_siftup(heap, parent);
      }
 }
 
-void siftdown(int *heap, int i) {  }
+void siftdown(int *heap, int i)
+{
+
+}
 
 void recursive_siftdown(int *heap, int i)
 {
     // move element i down to its correct position
-    int child = i * 2;
-    if (heap[child] < heap[get_right(i)]) child += 1;  // Look for larger of 2 children
-    if (heap[i] < heap[child]) {
-        swap(&heap[i], &heap[child]);
-        recursive_siftdown(heap, child);
+    int left_child = (i * 2) + 1;
+    int right_child = (i * 2) + 2;
+
+    if (left_child >= N_CTR) return;
+    int min_index = i;
+
+    if (heap[i] < heap[left_child]) min_index = left_child;  // Look for larger of 2 children
+    if ((right_child < N_CTR) && (heap[min_index] < heap[right_child])) min_index = right_child;
+
+    if (min_index != i) {
+        swap(&heap[i], &heap[min_index]);
+        recursive_siftdown(heap, min_index);
     }
 }
 
