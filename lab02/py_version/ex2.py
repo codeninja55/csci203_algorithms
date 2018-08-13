@@ -14,15 +14,15 @@ N_CTR = 0
 
 
 def get_parent(i=0):
-    return floor((i + 1) / 2)
+    return floor(i / 2)
 
 
 def get_left(i=0):
-    return (i + 1) * 2
+    return (i * 2) + 1
 
 
 def get_right(i=0):
-    return ((i + 1) * 2) + 1
+    return (i * 2) + 2
 
 
 def swap(idx1, idx2):
