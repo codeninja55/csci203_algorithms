@@ -4,6 +4,26 @@
  * Author: codeninja55
  *********************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+
+// A function to return the current time
+/* Title: localtime reference
+ * Author(s):
+ * Date:
+ * Availability: http://www.cplusplus.com/reference/ctime/localtime/
+ * */
+char* get_current_time()
+{
+    time_t rawtime;
+    struct tm * timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    return asctime(timeinfo);
+}
+
 // A function to display an error message and then exit
 void fatal(char *message)
 {
