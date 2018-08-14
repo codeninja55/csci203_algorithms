@@ -15,11 +15,11 @@ BACKWARD = array.array('i', [0 for z in range(100)])
 VALID_COUNT = 0
 
 
-def check(probe):
+def check(probe: int) -> bool:
     return 0 < BACKWARD[probe] <= VALID_COUNT and FORWARD[BACKWARD[probe]] == probe
 
 
-def insert(elem, pos):
+def insert(elem: int, pos: int) -> None:
     global VALID_COUNT
     VALID_COUNT += 1
     DATA[pos] = elem
@@ -28,8 +28,6 @@ def insert(elem, pos):
 
 
 if __name__ == '__main__':
-    base_dir = "/"
-    path_to_file = os.path.join(base_dir, filename)
     cwd = os.getcwd()
     print(cwd)
 
@@ -51,12 +49,11 @@ if __name__ == '__main__':
                 insert(int(line_arr[0]), int(line_arr[1]))
 
             if len(line_arr) == 1:
-                if check(int(line_arr[0])):
-                    print("TRUE")
-                else:
-                    print("FALSE")
-
-            # print(line_arr)
-
-        for i in DATA:
-            print("Index: {} | Value: {}".format(i, DATA[i]))
+                print("{test} : {value}".format(
+                    test=("TRUE"
+                          if check(probe=int(line_arr[0]))
+                          else "FALSE"),
+                    value=("Value: " + str(DATA[int(line_arr[0])])
+                           if check(probe=int(line_arr[0]))
+                           else "Probe: " + line_arr[0])
+                ))
