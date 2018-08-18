@@ -12,13 +12,14 @@
 #include <memory.h>
 #include <helper.h>
 
-// typedef struct Node Node;
-
 typedef struct Node {
     long int key;
     struct Node *left, *right;
     int height;
 } Node;
+
+/* GLOBAL VARS */
+int COUNTER = 0;
 
 /* FUNCTION PROTOTYPES */
 Node* bst_insert_first(long int);
@@ -50,15 +51,12 @@ int main(int argc, const char* argv[])
     long int key;
 
     while ( fscanf(fd, "%li\n", &key) == 1 ) {
-        if ( ROOT == NULL )
-            ROOT = bst_insert_first(key);
-        else
-            bst_insert(ROOT, key);
+        if ( ROOT == NULL ) ROOT = bst_insert_first(key);
+        else bst_insert(ROOT, key);
     }
 
     fclose(fd);
     in_order_sort(ROOT);
-
     return 0;
 }
 
@@ -90,17 +88,14 @@ void bst_insert(Node* node, long int key)
         left = false;
     }
 
-    if ( next != NULL ) {
-        bst_insert(next, key);
-    } else {
+    if ( next != NULL ) bst_insert(next, key);  // Traverse down the tree
+    else {
         Node *new_node_ptr = (Node *) ec_malloc(sizeof(Node));
         new_node_ptr->key = key;
         new_node_ptr->left = new_node_ptr->right = NULL;
         new_node_ptr->height = 0;
-        if ( left )
-            node->left = new_node_ptr;
-        else
-            node->right = new_node_ptr;
+        if ( left ) node->left = new_node_ptr;
+        else node->right = new_node_ptr;
     }
 }
 
@@ -109,7 +104,9 @@ void in_order_sort(struct Node* tree)
 {
     if ( tree != NULL ) {
         if ( tree->left != NULL ) in_order_sort(tree->left);
-        printf("%ld\n", tree->key);
+        if ( COUNTER != 0 && (COUNTER % 10) == 0 ) printf("\n");
+        COUNTER++;
+        printf("%5ld", tree->key);
         if ( tree->right != NULL ) in_order_sort(tree->right);
     }
 }
