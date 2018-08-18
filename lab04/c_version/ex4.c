@@ -25,11 +25,13 @@ int COUNTER = 0;
 Node* bst_insert_first(long int);
 void bst_insert(Node*, long int);
 void in_order_sort(Node*);
-// void avl_insert(Node*, Node);
-// void avl_rotate_right(Node);
-// void avl_rotate_left(Node);
-// void avl_double_rotate_right(Node);
-// void avl_double_rotate_left(Node);
+Node* avl_insert(Node*, long int);
+Node* avl_rotate_right(Node*);
+Node* avl_rotate_left(Node*);
+Node* avl_double_rotate_right(Node*);
+Node* avl_double_rotate_left(Node*);
+int height(Node*);
+int get_balance(Node*);
 int max(int, int);
 
 int main(int argc, const char* argv[])
@@ -48,15 +50,20 @@ int main(int argc, const char* argv[])
     }
 
     Node *ROOT = NULL;
+    Node *AVL_ROOT = NULL;
+    // AVL_ROOT = (Node *) ec_malloc(sizeof(Node));
     long int key;
 
     while ( fscanf(fd, "%li\n", &key) == 1 ) {
-        if ( ROOT == NULL ) ROOT = bst_insert_first(key);
-        else bst_insert(ROOT, key);
+        printf("[DEBUG]: Read: [ %li ]\n", key);
+        // if ( ROOT == NULL ) ROOT = bst_insert_first(key);
+        // else bst_insert(ROOT, key);
+        AVL_ROOT = avl_insert(AVL_ROOT, key);
     }
 
     fclose(fd);
-    in_order_sort(ROOT);
+    // in_order_sort(ROOT);
+    in_order_sort(AVL_ROOT);
     return 0;
 }
 
@@ -111,49 +118,100 @@ void in_order_sort(struct Node* tree)
     }
 }
 
-/*void avl_insert(Node* tree, Node node)
+Node* avl_insert(Node* node, long int key)
 {
-    if ( tree == NULL ) {
-        tree = (Node *) ec_malloc((sizeof(Node)) * 100);
-        *tree = node;
-    } else if ( node.key < tree->key ) {
-        avl_insert(tree->left, node);
+    if ( node == NULL ) {
+        Node *new_node = (Node *) ec_malloc(sizeof(Node));
+        new_node->key = key;
+        new_node->left = new_node->right = NULL;
+        new_node->height = 0;
+        return new_node;
+    } else if ( key < node->key ) {
+        node->left = avl_insert(node->left, key);
+    } else if ( key > node->key ) {
+        node->right = avl_insert(node->right, key);
+    } else return node;  // Equal keys not allowed
 
-        if ( node.key < (tree->left)->key ) avl_rotate_right(node);  // rotate right
-        else avl_double_rotate_right(node);  // rotate right and then left again
-    } else if ( node.key > tree->key ) {
-        avl_insert(tree->right, node);
+    // tree->height = 1 + max((tree->left)->height, (tree->right)->height);
+    node->height = 1 + max(height(node->left), height(node->right));
 
-        if ( (tree->right)->height - (tree->left)->height == 2 ) {
-            if ( node.key < (tree->right)->key ) avl_double_rotate_left(node);
-            else avl_rotate_left(node);
-        }
+    int balance = get_balance(node);
+
+    // Checking the imbalance and balancing the BST.
+    /* CASE 1 - left left case */
+    if ( balance > 1 && key < (node->left)->key )
+        return avl_rotate_right(node);
+
+    /* CASE 2 - right right case */
+    if ( balance < -1 && key > (node->right)->key )
+        return avl_rotate_left(node);
+
+    /* CASE 3 - left right case */
+    if ( balance > 1 && key > (node->left)->key ) {
+        node->left = avl_rotate_left(node->left);
+        return avl_rotate_right(node);
     }
 
-    tree->height = max((tree->left)->height, (tree->right)->height) + 1;
+    /* CASE 4 - right left case */
+    if ( balance < -1 && key < (node->right)->key ) {
+        node->right = avl_rotate_right(node->right);
+        return avl_rotate_left(node);
+    }
 
+    return node;
+}
+
+
+Node* avl_rotate_right(Node* n2)
+{
+    Node *n1 = n2->left;
+    Node *t2 = n1->right;
+
+    n1->right = n2;
+    n2->left = t2;
+    n2->height = 1 + max(height(n2->left), height(n2->right));
+    n1->height = 1 + max(height(n1->left), height(n2));
+    return n1;
+}
+
+Node* avl_rotate_left(Node* n2)
+{
+    Node *n1 = n2->right;
+    Node *t2 = n1->left;
+
+    n1->left = n2;
+    n2->right = t2;
+
+    n2->height = 1 + max(height(n2->left), height(n2->right));
+    n1->height = 1 + max(height(n2), height(n1->right));
+    return n1;
+}
+
+/*void avl_double_rotate_right(Node* n3)
+{
+    avl_rotate_left(n3->left);
+    avl_rotate_right(n3);
+}
+
+void avl_double_rotate_left(Node* n3)
+{
+    avl_rotate_right(n3->right);
+    avl_rotate_left(n3);
 }*/
 
+/* HELPER FUNCTIONS */
 
-// void avl_rotate_right(Node node)
-// {
-//
-// }
-//
-// void avl_rotate_left(Node node)
-// {
-//
-// }
-//
-// void avl_double_rotate_right(Node node)
-// {
-//
-// }
-//
-// void avl_double_rotate_left(Node node)
-// {
-//
-// }
+// A helper function to get the height of the tree
+int height(Node *n)
+{
+    return (n == NULL) ? 0 : n->height;
+}
+
+// Get Balance factor of node N
+int get_balance(Node *n)
+{
+    return (n == NULL) ? 0 : height(n->left) - height(n->right);
+}
 
 int max(int a, int b)
 {
