@@ -56,13 +56,18 @@ int main(int argc, const char* argv[])
 
     while ( fscanf(fd, "%li\n", &key) == 1 ) {
         // printf("[DEBUG]: Read: [ %li ]\n", key);
-        // if ( ROOT == NULL ) ROOT = bst_insert_first(key);
-        // else bst_insert(ROOT, key);
+        // BST
+        if ( ROOT == NULL ) ROOT = bst_insert_first(key);
+        else bst_insert(ROOT, key);
+        // AVL BST
         AVL_ROOT = avl_insert(AVL_ROOT, key);
     }
 
     fclose(fd);
-    // in_order_sort(ROOT);
+    printf("%10s%-50s\n", " ", "|===== BST IN-ORDER SORT =====|");
+    in_order_sort(ROOT);
+    printf("\n\n%10s%-50s\n", " ", "|===== AVL IN-ORDER SORT =====|");
+    COUNTER = 0;
     in_order_sort(AVL_ROOT);
     return 0;
 }
