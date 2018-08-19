@@ -55,7 +55,7 @@ int main(int argc, const char* argv[])
     long int key;
 
     while ( fscanf(fd, "%li\n", &key) == 1 ) {
-        printf("[DEBUG]: Read: [ %li ]\n", key);
+        // printf("[DEBUG]: Read: [ %li ]\n", key);
         // if ( ROOT == NULL ) ROOT = bst_insert_first(key);
         // else bst_insert(ROOT, key);
         AVL_ROOT = avl_insert(AVL_ROOT, key);
@@ -147,16 +147,12 @@ Node* avl_insert(Node* node, long int key)
         return avl_rotate_left(node);
 
     /* CASE 3 - left right case */
-    if ( balance > 1 && key > (node->left)->key ) {
-        node->left = avl_rotate_left(node->left);
-        return avl_rotate_right(node);
-    }
+    if ( balance > 1 && key > (node->left)->key )
+        return avl_double_rotate_right(node);
 
     /* CASE 4 - right left case */
-    if ( balance < -1 && key < (node->right)->key ) {
-        node->right = avl_rotate_right(node->right);
-        return avl_rotate_left(node);
-    }
+    if ( balance < -1 && key < (node->right)->key )
+        return avl_double_rotate_left(node);
 
     return node;
 }
@@ -187,17 +183,17 @@ Node* avl_rotate_left(Node* n2)
     return n1;
 }
 
-/*void avl_double_rotate_right(Node* n3)
+Node* avl_double_rotate_right(Node* n3)
 {
-    avl_rotate_left(n3->left);
-    avl_rotate_right(n3);
+    n3->left = avl_rotate_left(n3->left);
+    return avl_rotate_right(n3);
 }
 
-void avl_double_rotate_left(Node* n3)
+Node* avl_double_rotate_left(Node* n3)
 {
-    avl_rotate_right(n3->right);
-    avl_rotate_left(n3);
-}*/
+    n3->right = avl_rotate_right(n3->right);
+    return avl_rotate_left(n3);
+}
 
 /* HELPER FUNCTIONS */
 
