@@ -27,7 +27,6 @@ typedef struct Node {
 
 typedef struct {
   int start_idx;
-  int end_idx;
   int length;
   int count;
 } Word;
@@ -40,18 +39,18 @@ int next_word = 0;
 
 /* Function prototypes */
 
-void append_word(char * str);
-char *preprocess_word(char * str);
+Word append_word(char * str);
+char * preprocess_word(char * str);
 
 // AVL Tree Prototypes
-Node* insert(Node * node, char * key);
-Node* rotate_right(Node * n2);
-Node* rotate_left(Node * n2);
-Node* double_rotate_right(Node * n3);
-Node* double_rotate_left(Node * n3);
+Node * insert(Node * node, char * key);
+Node * rotate_right(Node * n2);
+Node * rotate_left(Node * n2);
+Node * double_rotate_right(Node * n3);
+Node * double_rotate_left(Node * n3);
 // Node* search();
 void in_order_sort(Node * root);
-void pre_order_sort(Node * root);
+void reverse_in_order_sort(Node * root);
 int height(Node * n);
 int get_balance(Node * n);
 int max(int a, int b);
@@ -88,6 +87,8 @@ int main( int argc, const char* argv[] )
 
     int word_idx = 0;
     char new_str[WORD_SZ];
+    // TODO:
+    Node *word_tree;
 
     // 2. Read in a text file, not all at once. (This can be line by line, word by word, or char by char).
     while ( (fscanf(fd, "%s", new_str) ) == 1 ) {
@@ -97,7 +98,10 @@ int main( int argc, const char* argv[] )
         // folding all letters into lower case
         // 4. Store the unique words and maintain a count of each different word.
         /* Implementation: */
-        append_word(preprocess_word(new_str));
+        append_word(preprocess_word(new_str));  // TODO: Change the name of this function
+        // TODO: Append the Word struct to an AVL Tree sorted by something
+        // TODO: Also change the AVL Tree to increase the count of the word if the words are the same.
+
     }
 
     fclose(fd);
@@ -106,13 +110,17 @@ int main( int argc, const char* argv[] )
     /*for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
     printf("\n");
     for ( int m=0; m < next_word; m++ )
-        printf("start: %d : end: %d : length: %d \n", WORDS[m].start_idx, WORDS[m].end_idx, WORDS[m].length);
+        printf("start: %d : length: %d \n", WORDS[m].start_idx, WORDS[m].length);
 
     for ( int j=0; j < next_word; j++ ) {
+        int start = WORDS[j].start_idx;
+        int end = (int) (((j + 1) < next_word) ? WORDS[j + 1].start_idx : strlen(POOL));
+        int len = end - start;
+
         char * word = (char *) ec_malloc(sizeof(WORDS[j].length) + 1);
-        int l = WORDS[j].start_idx;
-        for ( int k=0; k < WORDS[j].length; k++ ) word[k] = POOL[l++];
-        word[WORDS[j].length] = '\0';
+        for ( int k=0; k < len; k++ ) word[k] = POOL[start++];
+        printf("start: %i end: %i len: %i\n", start, end, len);
+        word[end] = '\0';
         printf("%s\n", word);
         free(word);
     }*/
@@ -129,17 +137,19 @@ int main( int argc, const char* argv[] )
 
 /* PRIVATE FUNCTIONS */
 
-void append_word(char *str)
+// Append each char from the passed string to the string pool and define/init a Word struct to store its
+// positional index which is added to the global WORDS array and returned
+Word append_word(char *str)
 {
-    Word new_word = { .start_idx = next_char, .end_idx = 0, .count = 1, .length = 0 };
-    for ( int i=0; i < strlen(str); i++ ) {
-        POOL[next_char++] = str[i];
-        new_word.length++;
-    }
-    new_word.end_idx = next_char - 1;
+    Word new_word = { .start_idx = next_char, .count = 1, .length = 0 };
+    while ( new_word.length < strlen(str) )
+        POOL[next_char++] = str[new_word.length++];
+
     WORDS[next_word++] = new_word;
+    return new_word;
 }
 
+// Pre-process the word removing all non-alphanumeric chars and returning the pointer to the processed char array.
 char *preprocess_word(char * str)
 {
     int i, j, n = (int) strlen(str);
@@ -152,7 +162,7 @@ char *preprocess_word(char * str)
 
 /****************| AVL TREE IMPLEMENTATION |****************/
 // Recursively insert a node into the tree and then fix it's balance by rotations
-Node* insert(Node* node, char *key)
+Node* insert(Node *node, char *key)
 {
     if ( node == NULL ) {  // Root of tree OR at a NULL left or right pointer where node is meant to be
         Node *new_node = (Node *) ec_malloc(sizeof(Node));
@@ -197,7 +207,7 @@ Node* insert(Node* node, char *key)
     return node;
 }
 
-Node* rotate_right(Node* n2)
+Node* rotate_right(Node *n2)
 {
     Node *n1 = n2->left;
     Node *t2 = n1->right;
@@ -209,7 +219,7 @@ Node* rotate_right(Node* n2)
     return n1;
 }
 
-Node* rotate_left(Node* n2)
+Node* rotate_left(Node *n2)
 {
     Node *n1 = n2->right;
     Node *t2 = n1->left;
@@ -222,26 +232,16 @@ Node* rotate_left(Node* n2)
     return n1;
 }
 
-Node* double_rotate_right(Node* n3)
+Node* double_rotate_right(Node *n3)
 {
     n3->left = rotate_left(n3->left);
     return rotate_right(n3);
 }
 
-Node* double_rotate_left(Node* n3)
+Node* double_rotate_left(Node *n3)
 {
     n3->right = rotate_right(n3->right);
     return rotate_left(n3);
-}
-
-// Sort before ordering the tree
-void pre_order_sort(Node *root)
-{
-    if ( root != NULL ) {
-        printf("%s\n", root->key);
-        pre_order_sort(root->left);
-        pre_order_sort(root->right);
-    }
 }
 
 // Traverse and sort the BST in-order
@@ -254,19 +254,29 @@ void in_order_sort(Node *root)
     }
 }
 
-// Traverse the tree to search for a node based on key
-Node* search(Node* ROOT, char *key)
+// Traverse and sort the BST with reverse in-order
+void reverse_in_order_sort(Node *root)
 {
-    if ( ROOT == NULL )
+    if ( root != NULL ) {
+        in_order_sort(root->right);
+        printf("%s\n", root->key);
+        in_order_sort(root->left);
+    }
+}
+
+// Traverse the tree to search for a node based on key
+Node* search(Node *root, char *key)
+{
+    if ( root == NULL )
         return NULL;
 
-    if ( strncmp(key, ROOT->key, 32) == 0 )
-        return ROOT;
+    if ( strncmp(key, root->key, 32) == 0 )
+        return root;
 
-    if ( strncmp(key, ROOT->key, 32 ) < 0 )
-        return search(ROOT->left, key );
+    if ( strncmp(key, root->key, 32 ) < 0 )
+        return search(root->left, key );
     else
-        return search(ROOT->right, key);
+        return search(root->right, key);
 }
 
 /* HELPER FUNCTIONS */
