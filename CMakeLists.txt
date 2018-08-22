@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
-project(${PROJECT_SOURCE_DIR}/lab04/c_version C)
+project(${PROJECT_SOURCE_DIR}/assignment01/c_version C)
 
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/lab04)
-include_directories(${PROJECT_SOURCE_DIR}/lab04/c_version)
+include_directories(${PROJECT_SOURCE_DIR}/assignment01)
+include_directories(${PROJECT_SOURCE_DIR}/assignment01/c_version)
+
+#target_link_libraries()
 
 set(CMAKE_C_STANDARD 99)
 set(dir ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/lab04/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/assignment01/")
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+set(SOURCE_FILES helper.h helper.c assignment01/c_version/assignment01.c
+        assignment01/c_version/avltree.h assignment01/c_version/avltree.c)
 
-add_executable(ex4 helper.h lab04/c_version/ex4.c)
+add_executable(ass1 ${SOURCE_FILES})
