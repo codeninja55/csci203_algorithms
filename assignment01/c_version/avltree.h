@@ -1,8 +1,0 @@
-//
-// Created by codeninja on 21/08/18.
-//
-
-#ifndef ASSIGNMENT01_C_VERSION_AVLTREE_H
-#define ASSIGNMENT01_C_VERSION_AVLTREE_H
-
-#endif //ASSIGNMENT01_C_VERSION_AVLTREE_H
