@@ -51,7 +51,7 @@ int main(int argc, const char* argv[])
 
     Node *ROOT = NULL;
     Node *AVL_ROOT = NULL;
-    // AVL_ROOT = (Node *) ec_malloc(sizeof(Node));
+
     long int key;
 
     while ( fscanf(fd, "%li\n", &key) == 1 ) {
