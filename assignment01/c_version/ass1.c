@@ -43,6 +43,7 @@ Node *WORD_TREE = NULL;
 /* Function prototypes */
 char * preprocess_word(char * str);
 
+// QuickSort Prototypes
 void quicksort(Word arr[], int low, int high);
 int partition(Word arr[], int low, int high);
 
@@ -58,9 +59,9 @@ void reverse_in_order_sort(Node * root);
 int height(Node * n);
 int get_balance(Node * n);
 int max(int a, int b);
-// int str_cmp(const char * str1, const char * str2);
 
 // Helper Utility Funcs Prototypes
+int str_cmp (const char *str1, const char *str2);
 void swap(Word *v1, Word *v2);
 char * get_current_time();
 void fatal(char *message);
@@ -134,21 +135,35 @@ int main( int argc, const char* argv[] )
     // reverse_in_order_sort(word_tree);
 
     int n = WORDS_CTR - 1;
-    printf("WORDS[] before Sort \n");
-    for (int l=0; l < n; l ++ ) printf("%d ", WORDS[l].start_idx);
-    quicksort(WORDS, 0, n - 1);
-    printf("\nQUICKSORT WORDS[] \n");
-    for ( int j=0; j < n; j++ ) {
+    // printf("WORDS[] before Sort \n");
+    // for (int l=0; l < n; l ++ ) printf("%d ", WORDS[l].start_idx);
+    quicksort(WORDS, 0, n);
+    // printf("\nQUICKSORT WORDS[] \n");
+    /*for ( int j=0; j < n; j++ ) {
         printf("%d [ %d ] : ", WORDS[j].start_idx, WORDS[j].count);
         for ( int k=0; k < WORDS[j].length; k++ ) printf("%c", POOL[(WORDS[j].start_idx)++]);
         printf("\n");
-    }
+    }*/
 
     // TODO: Testing String Pool and Word Struct Array
-    for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
+    // for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
     // printf("\n");
     // for ( int m=0; m < next_word; m++ )
     //     printf("start: %d : length: %d \n", WORDS[m].start_idx, WORDS[m].length);
+
+    printf("\nTOP 10 WORDS[] \n");
+    for ( int m=n; m > (n - 10); m-- ) {
+        printf("%d [ %d ] : ", WORDS[m].start_idx, WORDS[m].count);
+        for ( int k=0; k < WORDS[m].length; k++ ) printf("%c", POOL[(WORDS[m].start_idx)++]);
+        printf("\n");
+    }
+
+    printf("\nBOTTOM 10 WORDS[] \n");
+    for ( int n=0; n < 10; n++ ) {
+        printf("%d [ %d ] : ", WORDS[n].start_idx, WORDS[n].count);
+        for ( int k=0; k < WORDS[n].length; k++ ) printf("%c", POOL[(WORDS[n].start_idx)++]);
+        printf("\n");
+    }
 }
 
 /* PRIVATE FUNCTIONS */
@@ -312,10 +327,10 @@ Node *search(Node *root, char *key)
     if ( root == NULL )
         return NULL;
 
-    if ( strcmp(key, root->key) == 0 )
+    if ( str_cmp(key, root->key) == 0 )
         return root;
 
-    if ( strcmp(key, root->key) < 0 )
+    if ( str_cmp(key, root->key) < 0 )
         search(root->left, key );
     else
         search(root->right, key);
@@ -341,7 +356,18 @@ int max(int a, int b)
 }
 
 /****************| HELPER UTILITY FUNC IMPLEMENTATION |****************/
+// Custom strcmp method using pointers
+int str_cmp (const char *str1, const char *str2)
+{
+    while ( *str1 || *str2 ) {
+        if ( *str1 != *str2 ) return *str1 - *str2;
+        ++str1;
+        ++str2;
+    }
+    return 0;
+}
 
+// Swap the Word struct
 void swap(Word *v1, Word *v2)
 {
     Word temp = *v1;
