@@ -53,15 +53,17 @@ Node * rotate_right(Node * n2);
 Node * rotate_left(Node * n2);
 Node * double_rotate_right(Node * n3);
 Node * double_rotate_left(Node * n3);
-Node * search(Node *root, char *key);
+Node * search(Node * root, char * word);
 void in_order_sort(Node * root);
 void reverse_in_order_sort(Node * root);
 int height(Node * n);
 int get_balance(Node * n);
-int max(int a, int b);
 
 // Helper Utility Funcs Prototypes
-int str_cmp (const char *str1, const char *str2);
+int max(int a, int b);
+int min(int a, int b);
+int str_cmp(const Word * str1, const char * str2);
+int word_str_cmp(const char pool[], const Word * str1, const Word * str2);
 void swap(Word *v1, Word *v2);
 char * get_current_time();
 void fatal(char *message);
@@ -71,7 +73,6 @@ void * ec_malloc(unsigned int size);
 int main( int argc, const char* argv[] )
 {
     printf("CSCI203 Assignment 01\nAuthor: Dinh Che (dbac496)\nRun at: %s\n", get_current_time());
-
     FILE *fd;
     char buffer[BUFFER_SZ], filename[BUFFER_SZ];
 
@@ -91,18 +92,14 @@ int main( int argc, const char* argv[] )
         exit(1);
     }
 
-    // int word_idx = 0;
     char new_str[WORD_SZ];
-
     // 2. Read in a text file, not all at once. (This can be line by line, word by word, or char by char).
     /* Implementation: */
     while ( fscanf(fd, "%s", new_str) == 1 ) {
         if (ferror(fd)) break;
-
         // 3. The file content must be converted to a sequence of words, discarding punctuation and
         // folding all letters into lower case
         char *new_word = preprocess_word(new_str);
-
         // 4. Store the unique words and maintain a count of each different word.
         /* Implementation: */
 
@@ -117,7 +114,7 @@ int main( int argc, const char* argv[] )
         if ( ret != NULL ) {
             ret->word->count++;
         } else {
-            Word word_struct = {.start_idx = NEXT_CHAR, .count = 1, .length = 0};
+            Word word_struct = { .start_idx = NEXT_CHAR, .count = 1, .length = 0 };
             while (word_struct.length < strlen(new_word))
                 POOL[NEXT_CHAR++] = new_word[word_struct.length++];
 
@@ -126,7 +123,6 @@ int main( int argc, const char* argv[] )
             WORDS_CTR++;
         }
     }
-
     fclose(fd);
 
     printf("BINARY TREE SORT word_tree\n");
@@ -135,23 +131,25 @@ int main( int argc, const char* argv[] )
     // reverse_in_order_sort(word_tree);
 
     int n = WORDS_CTR - 1;
-    // printf("WORDS[] before Sort \n");
-    // for (int l=0; l < n; l ++ ) printf("%d ", WORDS[l].start_idx);
-    quicksort(WORDS, 0, n);
-    // printf("\nQUICKSORT WORDS[] \n");
-    /*for ( int j=0; j < n; j++ ) {
+    printf("WORDS[] before quicksort \n");
+    for (int l=0; l < n; l ++ ) printf("%d ", WORDS[l].start_idx);
+    quicksort(WORDS, 0, n-1);
+    printf("\nWORDS[] after quicksort \n");
+    for (int l=0; l < n; l ++ ) printf("%d ", WORDS[l].start_idx);
+    printf("\nQUICKSORT WORDS[] \n");
+    for ( int j=0; j < n; j++ ) {
         printf("%d [ %d ] : ", WORDS[j].start_idx, WORDS[j].count);
         for ( int k=0; k < WORDS[j].length; k++ ) printf("%c", POOL[(WORDS[j].start_idx)++]);
         printf("\n");
-    }*/
+    }
 
     // TODO: Testing String Pool and Word Struct Array
-    // for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
+    for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
     // printf("\n");
     // for ( int m=0; m < next_word; m++ )
     //     printf("start: %d : length: %d \n", WORDS[m].start_idx, WORDS[m].length);
 
-    printf("\nTOP 10 WORDS[] \n");
+    /*printf("\nTOP 10 WORDS[] \n");
     for ( int m=n; m > (n - 10); m-- ) {
         printf("%d [ %d ] : ", WORDS[m].start_idx, WORDS[m].count);
         for ( int k=0; k < WORDS[m].length; k++ ) printf("%c", POOL[(WORDS[m].start_idx)++]);
@@ -163,7 +161,7 @@ int main( int argc, const char* argv[] )
         printf("%d [ %d ] : ", WORDS[n].start_idx, WORDS[n].count);
         for ( int k=0; k < WORDS[n].length; k++ ) printf("%c", POOL[(WORDS[n].start_idx)++]);
         printf("\n");
-    }
+    }*/
 }
 
 /* PRIVATE FUNCTIONS */
@@ -215,7 +213,6 @@ int partition(Word arr[], int low, int high)
     swap(&arr[i + 1], &arr[high]);
     return (i + 1);
 }
-
 
 /****************| AVL TREE IMPLEMENTATION |****************/
 // Recursively insert a node into the tree and then fix it's balance by rotations
@@ -322,18 +319,18 @@ void in_order_sort(Node *root)
 }*/
 
 // Traverse the tree to search for a node based on key
-Node *search(Node *root, char *key)
+Node *search(Node *root, char *word)
 {
     if ( root == NULL )
         return NULL;
 
-    if ( str_cmp(key, root->key) == 0 )
+    if ( str_cmp(root->word, word) == 0 )
         return root;
 
-    if ( str_cmp(key, root->key) < 0 )
-        search(root->left, key );
+    if ( str_cmp(root->word, word) < 0 )
+        search(root->left, word);
     else
-        search(root->right, key);
+        search(root->right, word);
 }
 
 /* HELPER FUNCTIONS */
@@ -349,21 +346,55 @@ int get_balance(Node *n)
     return (n == NULL) ? 0 : height(n->left) - height(n->right);
 }
 
+/****************| HELPER UTILITY FUNC IMPLEMENTATION |****************/
 // Get the max between values a and b
 int max(int a, int b)
 {
     return (a > b) ? a : b;
 }
 
-/****************| HELPER UTILITY FUNC IMPLEMENTATION |****************/
-// Custom strcmp method using pointers
-int str_cmp (const char *str1, const char *str2)
+// Get the min between values a and b
+int min(int a, int b)
 {
-    while ( *str1 || *str2 ) {
-        if ( *str1 != *str2 ) return *str1 - *str2;
-        ++str1;
-        ++str2;
+    return (a < b) ? a : b;
+}
+
+// Custom strcmp comparing a string arr to a string stored in the string pool.
+int str_cmp(const Word *str1, const char *str2)
+{
+    for ( int i=0; i < min(str1->length, (int) strlen(str2)); i++ ) {
+        if ( POOL[str1->start_idx + i] < str2[i] )
+            return 1;
+        if ( POOL[str1->start_idx + i] > str2[i] )
+            return -1;
     }
+
+    if ( str1->length < strlen(str2) )
+        return 1;
+    if ( str1->length > strlen(str2) )
+        return -1;
+
+    return 0;
+}
+
+// Custom strcmp method using Word structs
+int word_str_cmp(const char pool[], const Word *str1, const Word *str2)
+{
+    // Only compare as many characters as the length of the shortest word
+    for ( int i=0; i < min(str1->length, str2->length); i++ ) {
+        if ( pool[str1->start_idx + i] < pool[str2->start_idx + i] )
+            return -1;
+        if ( pool[str1->start_idx + i] > pool[str2->start_idx + i] )
+            return 1;
+    }
+
+    // the substrings we have compared so far are equal so the shorter of the two words is smaller
+    if ( str1->length < str2->length )
+        return -1;
+    if ( str1->length > str2->length )
+        return 1;
+
+    // Otherwise the words are the same and return 0
     return 0;
 }
 
