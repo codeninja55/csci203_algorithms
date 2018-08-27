@@ -20,15 +20,12 @@
 
 /* Struct Definitions */
 typedef struct {
-    int start_idx;
-    int length;
-    int count;
+    int start_idx, length, count;
 } Word;
 
 typedef struct Node {
-    int key;
+    int key, height;
     struct Node *left, *right;
-    int height;
 } Node;
 
 /* Global Vars */
@@ -81,7 +78,7 @@ int main( int argc, const char* argv[] )
     else {
         printf("Input file name: ");
         scanf("%s", buffer);
-        if ( strlen(buffer) < BUFFER_SZ) strcpy(filename, buffer);
+        if ( strlen(buffer) < BUFFER_SZ ) strcpy(filename, buffer);
     }
 
     if ( (fd = fopen(filename, "r")) == NULL )  {
@@ -108,7 +105,7 @@ int main( int argc, const char* argv[] )
             WORDS[found->key].count += 1;
         } else {
             Word word_struct = { .start_idx = NEXT_CHAR, .count = 1, .length = 0 };
-            while (word_struct.length < strlen(new_word))
+            while ( word_struct.length < strlen(new_word) )
                 POOL[NEXT_CHAR++] = new_word[word_struct.length++];
 
             WORDS[WORDS_CTR] = word_struct;
@@ -160,7 +157,8 @@ char *preprocess_word(char * str)
 {
     int i, j, n = (int) strlen(str);
     for ( i=0, j=0; i < n; i++ )
-        if ( isalpha(str[i]) ) str[j++] = (char) tolower(str[i]);
+        if ( isalpha(str[i]) )
+            str[j++] = (char) tolower(str[i]);
     str[j] = '\0';
     return str;
 }
