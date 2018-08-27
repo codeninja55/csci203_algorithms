@@ -1,11 +1,11 @@
 
 lecture01/c_version/\.idea/
 
-lab01/c_version/\.idea/
+ex01/c_version/\.idea/
 
-lab01/python_version/\.idea/
+ex01/python_version/\.idea/
 
-lab01/c_version/cmake-build-debug/
+ex01/c_version/cmake-build-debug/
 
 \.idea/
 
@@ -13,12 +13,15 @@ cmake-build-debug/
 
 lab01/dbac496@banshee\.uow\.edu\.au
 
-lab02/ex2
+ex02/ex2
 
-lab03/ex3
+ex03/ex3
 
 assignment01/c_version/ass1
 
 assignment01/ass1
 
-lab04/ex4
+ex04/ex4
+
+ex05/ex5
+
