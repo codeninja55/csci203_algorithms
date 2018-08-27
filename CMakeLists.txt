@@ -9,4 +9,4 @@ set(CMAKE_C_STANDARD 99)
 set(dir ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/ex05/")
 
-add_executable(ex5 helper.h ex05/c_version/ex5.c ex05/c_version/ex5.h)
+add_executable(ex5 helper.h helper.c ex05/c_version/ex5.c ex05/c_version/ex5.h)
