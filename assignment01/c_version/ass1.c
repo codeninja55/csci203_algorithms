@@ -3,7 +3,7 @@
 * assignment01.c - main() driver for assignment 1 implementation
 * Author: Dinh Che (codeninja55) | andrew at codeninja55.me
 * UOW Details: Dinh Che (5721970) | dbac496 at uowmail.edu.au
-* Last modified: 2018.08.23
+* Last modified: 2018.08.27
 *********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,11 @@
 #include <time.h>
 #include <assert.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type"
+
+#define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
+#define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
 #define BUFFER_SZ 200
 #define SIZE 10000
 #define WORD_SZ 15
@@ -43,6 +48,7 @@ char * preprocess_word(char * str);
 // QuickSort Prototypes
 void quicksort(Word words[], int low, int high);
 int partition(Word words[], int low, int high);
+int compare(Word *w1, Word *w2);
 
 // AVL Tree Prototypes
 Node * insert(Node * node, int key);
@@ -52,12 +58,10 @@ Node * double_rotate_right(Node * n3);
 Node * double_rotate_left(Node * n3);
 Node * search(Node * root, char * word);
 void in_order_sort(Node * root);
-int height(Node * n);
+int height(Node *n);
 int get_balance(Node * n);
 
 // Helper Utility Funcs Prototypes
-int max(int a, int b);
-int min(int a, int b);
 int str_cmp(const Word * str1, const char * str2);
 int word_str_cmp(const Word * str1, const Word * str2);
 void swap(Word *v1, Word *v2);
@@ -99,8 +103,8 @@ int main( int argc, const char* argv[] )
         // 4. Store the unique words and maintain a count of each different word.
         /* Implementation: Search the WORD_TREE AVL tree for the unique store of the word as key. If the word is
          * already in the tree, increase the count. If it is not, then create a new Word struct, word_struct.
-         * Add the new_word char array to the string pool, and add the word_struct to the WORDS[] arr.
-         * Insert the new word into the AVL tree with a pointer address to the word_struct in the WORDS[] arr. */
+         * Add the new_word char array to the string pool, and add the word_struct to the WORDS[] array.
+         * Insert the new word into the AVL tree with the key as the index to the word_struct position in the array. */
 
         Node *found = search(WORD_TREE, new_word);
         if ( found != NULL ) {
@@ -117,40 +121,26 @@ int main( int argc, const char* argv[] )
     }
     fclose(fd);
 
-    printf("BINARY TREE SORT word_tree\n");
-    in_order_sort(WORD_TREE);
-    // printf("\n");
-    // reverse_in_order_sort(word_tree);
-
+    // Get the N of WORDS[]
     int n = WORDS_CTR - 1;
-    // printf("WORDS[] before quicksort \n");
-    // for (int i=0; i < n; i++ ) printf("%d ", WORDS[i].start_idx);
-    quicksort(WORDS, 0, n - 1);
-    // printf("\nWORDS[] after quicksort \n");
-    // for (int l=0; l < n; l++ ) printf("%d ", WORDS[l].start_idx);
-    printf("\nQUICKSORT WORDS[] \n");
-    for ( int j=0; j < n; j++ ) {
-        printf("key: %p start: %d [ %d ] : ", &WORDS[j], WORDS[j].start_idx, WORDS[j].count);
-        for ( int k=0; k < WORDS[j].length; k++ ) printf("%c", POOL[(WORDS[j].start_idx) + k]);
-        printf("\n");
-    }
 
-    // TODO: Testing String Pool and Word Struct Array
-    // for ( int i=0; i < strlen(POOL); i++ ) printf("%c", POOL[i]);
+    // Quicksort WORDS[] to be in count and alphabetical order.
+    quicksort(WORDS, 0, n);
 
-    /*printf("\nTOP 10 WORDS[] \n");
+    // Print the output
+    printf("TOP 10 WORDS[] \n");
     for ( int m=n; m > (n - 10); m-- ) {
-        printf("%d [ %d ] : ", WORDS[m].start_idx, WORDS[m].count);
+        printf("Idx: %4d || Cnt: %2d || Word: ", WORDS[m].start_idx, WORDS[m].count);
         for ( int k=0; k < WORDS[m].length; k++ ) printf("%c", POOL[(WORDS[m].start_idx)++]);
         printf("\n");
     }
 
     printf("\nBOTTOM 10 WORDS[] \n");
     for ( int o=0; o < 10; o++ ) {
-        printf("%d [ %d ] : ", WORDS[o].start_idx, WORDS[o].count);
+        printf("Idx: %4d || Cnt: %2d || Word: ", WORDS[o].start_idx, WORDS[o].count);
         for ( int k=0; k < WORDS[o].length; k++ ) printf("%c", POOL[(WORDS[o].start_idx) + k]);
         printf("\n");
-    }*/
+    }
 }
 
 /* PRIVATE FUNCTIONS */
@@ -167,14 +157,14 @@ char *preprocess_word(char * str)
 
 /****************| QUICKSORT IMPLEMENTATION |****************/
 /* The main function that implements quicksort
- * arr[] --> array to be sorted.
+ * words[] --> array to be sorted.
  * low --> starting index.
  * high --> ending index.
  * */
 void quicksort(Word words[], int low, int high)
 {
     if ( low < high ) {
-        // Partitioning index, arr[p] is now at the right place
+        // Partitioning index is now at the right place
         int partition_idx = partition(words, low, high);
 
         quicksort(words, low, partition_idx - 1);  // Before partition_idx
@@ -188,19 +178,29 @@ void quicksort(Word words[], int low, int high)
  * */
 int partition(Word words[], int low, int high)
 {
-    int pivot = words[high].count;  // pivot (element to be placed at right position)
+    Word *pivot = &words[high];  // pivot (element to be placed at right position)
 
     int i = (low - 1);  // Index of smaller element
 
     for ( int j = low; j <= high - 1; j++ ) {
         // If the current element is smaller than or equal to pivot
-        if ( words[j].count <= pivot ) {
+        if ( compare(&words[j], pivot) <= 0 ) {
             i++; // increment index of smaller element ++i
             swap(&words[i], &words[j]);
         }
     }
     swap(&words[i + 1], &words[high]);
     return (i + 1);
+}
+
+int compare(Word *w1, Word *w2)
+{
+    if ( w1->count < w2->count )
+        return -1;
+    else if ( w1->count > w2->count )
+        return 1;
+    else
+        return word_str_cmp(w1, w2);
 }
 
 /****************| AVL TREE IMPLEMENTATION |****************/
@@ -236,7 +236,7 @@ Node* insert(Node *node, int key)
         node->right = insert(node->right, key);
 
     // Update the height of the node
-    node->height = 1 + max(height(node->left), height(node->right));
+    node->height = 1 + MAX(height(node->left), height(node->right));
 
     // Checking the imbalance and balancing the BST.
     int balance = get_balance(node);
@@ -271,8 +271,8 @@ Node* rotate_right(Node *n2)
 
     n1->right = n2;
     n2->left = t2;
-    n2->height = 1 + max(height(n2->left), height(n2->right));
-    n1->height = 1 + max(height(n1->left), height(n2));
+    n2->height = 1 + MAX(height(n2->left), height(n2->right));
+    n1->height = 1 + MAX(height(n1->left), height(n2));
     return n1;
 }
 
@@ -284,8 +284,8 @@ Node* rotate_left(Node *n2)
     n1->left = n2;
     n2->right = t2;
 
-    n2->height = 1 + max(height(n2->left), height(n2->right));
-    n1->height = 1 + max(height(n2), height(n1->right));
+    n2->height = 1 + MAX(height(n2->left), height(n2->right));
+    n1->height = 1 + MAX(height(n2), height(n1->right));
     return n1;
 }
 
@@ -327,27 +327,10 @@ int get_balance(Node *n)
 }
 
 /****************| HELPER UTILITY FUNC IMPLEMENTATION |****************/
-// Get the max between values a and b
-int max(int a, int b)
-{
-    return (a > b) ? a : b;
-}
-
-// Get the min between values a and b
-int min(int a, int b)
-{
-    return (a < b) ? a : b;
-}
-
-/*int compare_keys(Word )
-{
-
-}*/
-
 // Custom strcmp comparing a string arr to a string stored in the string pool.
 int str_cmp(const Word *str1, const char *str2)
 {
-    for ( int i=0; i < min(str1->length, (int) strlen(str2)); i++ ) {
+    for ( int i=0; i < MIN(str1->length, (int) strlen(str2)); i++ ) {
         if ( POOL[str1->start_idx + i] < str2[i] )
             return 1;
         if ( POOL[str1->start_idx + i] > str2[i] )
@@ -366,7 +349,7 @@ int str_cmp(const Word *str1, const char *str2)
 int word_str_cmp(const Word *str1, const Word *str2)
 {
     // Only compare as many characters as the length of the shortest word
-    for ( int i=0; i < min(str1->length, str2->length); i++ ) {
+    for ( int i=0; i < MIN(str1->length, str2->length); i++ ) {
         if ( POOL[str1->start_idx + i] < POOL[str2->start_idx + i] )
             return -1;
         if ( POOL[str1->start_idx + i] > POOL[str2->start_idx + i] )
@@ -397,7 +380,7 @@ void swap(Word *v1, Word *v2)
  * Date:
  * Availability: http://www.cplusplus.com/reference/ctime/localtime/
  * */
-char * get_current_time()
+char *get_current_time()
 {
     time_t rawtime;
     struct tm * timeinfo;
@@ -418,7 +401,7 @@ void fatal(char * message)
 }
 
 // An error-checked malloc() wrapper function
-void * ec_malloc(unsigned int size)
+void *ec_malloc(unsigned int size)
 {
     void *ptr;
     ptr = malloc(size);
@@ -426,3 +409,5 @@ void * ec_malloc(unsigned int size)
         fatal("in ec_malloc() on memory allocation");
     return ptr;
 }
+
+#pragma clang diagnostic pop
