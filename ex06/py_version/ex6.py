@@ -13,6 +13,11 @@ from pathlib import Path
 
 
 def read_file(filename):
+    """
+
+    :param filename:
+    :return:
+    """
     if filename:
         with open(filename, 'r') as fin:
             if fin.closed:
