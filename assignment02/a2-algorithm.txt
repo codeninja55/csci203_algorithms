@@ -1,0 +1,78 @@
+Below is one possible algorithm describing how the Assignment 2 descrete event simulator could be implemented:
+
+  ---- declarations ----
+
+Server{
+	// busy (or idle) flag
+	// stats stuff
+	// etc
+}
+
+Event{
+	// event type
+	// event time
+	// time periods in primary and secondary servers
+	// server number which created event
+	// etc
+}
+
+  ----- globals -----
+
+primary server array 
+secondary server array
+event priority queue (note: min event time has highest priority)
+primary server FIFO queue 
+secondary server FIFO queue
+
+
+main()
+      
+	open file
+	read num of primary and secondary servers
+	initialize servers etc	
+
+	read next customer arrival event from file and add a 'customer arrival event' to the event priority queue
+
+	while there are more arriving customers in file or customers in servers  // main event loop
+
+		get next event from event priority queue
+
+		if event is a 'customer arrival event'
+			if a primary server is available
+				add a 'customer finish being served in primary server event' to the event priority queue
+				read next customer arrival event from file and add a 'customer arival event' to the event priority queue
+				if no more customer arrivals in file set flag
+			else
+				add customer info to primary server FIFO queue
+
+		else if event is a 'customer finish being served in primary server event'
+			set primary server's busy flag to false
+			do service time stats
+			if a secondary server is available
+				add a: 'customer finish being served in secondary server event' to event priority queue
+			else
+				add customer info to secondary server FIFO queue
+
+		else if event is a 'customer finish being served in secondary server event'
+			set secondary server's busy flag to false
+			do service time stats
+
+
+		if secondary server FIFO queue is not empty and a secondary server is available
+			get next customer from secondary server FIFO queue and
+			add a 'customer finish being served in secondary server event' to event priority queue
+			do fifo queue waiting time stats
+
+
+		if primary server FIFO queue is not empty and a primary server is available
+			get next customer from primary server FIFO queue and
+			add a 'customer finish being served in primary server event' to event priority queue
+			do fifo queue waiting time stats
+		
+	end while  //main event loop
+	
+	calculate and printout statistics
+
+end main()
+
+

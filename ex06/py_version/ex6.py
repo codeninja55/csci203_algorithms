@@ -4,7 +4,6 @@
 # Author: Dinh Che (codeninja55) | andrew at codeninja55.me
 # UOW Details: dbac496 | 5721970 | dbac496 at uowmail.edu.au
 # Last modified: 2018.09.03
-# REFERENCE: https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
 #######################################################################
 import os
 import sys
@@ -14,9 +13,8 @@ from pathlib import Path
 
 def read_file(filename):
     """
-
-    :param filename:
-    :return:
+    Reads the file with the passed in filename and completes the implementation of karp_rabin_search().
+    :param filename: char array[] string, filename of the file to read.
     """
     if filename:
         with open(filename, 'r') as fin:
