@@ -20,10 +20,10 @@ void EventQueue::min_heapify(int i)
 {
     int smallest = i;
 
-    if (LEFT(i) <= _n_events && _q[LEFT(i)].customer.arrival_time < _q[i].customer.arrival_time)
+    if (LEFT(i) <= _n_events && _q[LEFT(i)].event_time < _q[i].event_time)
         smallest = LEFT(i);
 
-    if (RIGHT(i) <= _n_events && _q[RIGHT(i)].customer.arrival_time < _q[smallest].customer.arrival_time)
+    if (RIGHT(i) <= _n_events && _q[RIGHT(i)].event_time < _q[smallest].event_time)
         smallest = RIGHT(i);
 
     if (smallest != i) {
@@ -39,8 +39,7 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
         return;
     }
 
-    _n_events++;
-    int i = _n_events - 1;
+    int i = _n_events++;
     Event new_event = { ev_type, ev_time, cust };
     _q[i] =  new_event;
 
@@ -48,7 +47,7 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     std::cout << "Ev added ==> {" << ev_type << "} : (ID: " << cust.cust_id << ") : " << ev_time << std::endl;
 
     // Fix min-heap property
-    while (i != 0 && _q[PARENT(i)].customer.arrival_time > _q[i].customer.arrival_time) {
+    while (i != 0 && _q[PARENT(i)].event_time > _q[i].event_time) {
         swap(&_q[i], &_q[PARENT(i)]);
         i = PARENT(i);
     }
