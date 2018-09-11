@@ -11,6 +11,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iomanip>
 #include "EventQueue.h"
 #include "ServerQueue.h"
 #include "Servers.h"
@@ -45,14 +46,19 @@ int main(int argc, const char* argv[])
     Servers secondary_servers = Servers(n_sec_servers);
 
     // Initialise queues
-    ServerQueue prim_server_q = ServerQueue(1000);
-    ServerQueue sec_server_q = ServerQueue(1000);
-    EventQueue event_q = EventQueue(2000);
+    ServerQueue prim_server_q = ServerQueue(100);
+    ServerQueue sec_server_q = ServerQueue(100);
+    EventQueue event_q = EventQueue(100);
 
     bool cust_arrival_flag = true;
 
     Customer first_cust;
-    fin >> first_cust.arrival_time >> first_cust.prim_service_duration >> first_cust.sec_service_duration;
+    first_cust.cust_id = G_CUST_ID++;
+    first_cust.server_id = -1;
+    fin >> first_cust.arrival_time
+        >> first_cust.prim_service_duration
+        >> first_cust.sec_service_duration;
+
     event_q.add_event(eCustomerArrived, first_cust.arrival_time, first_cust);
     Time time = event_q.peek_next_event().event_time;
 
@@ -65,21 +71,29 @@ int main(int argc, const char* argv[])
         switch (ev.type) {
             case eCustomerArrived:
                 if (primary_servers.is_available()) {
-                    Time ca_ev_time = time + ev.customer.prim_service_duration;
-                    primary_servers.add_customer(ev.customer);
-                    event_q.add_event(eCustPrimaryFinished, ca_ev_time, ev.customer);
+                    Time eCPF_ev_time = ev.customer.arrival_time + ev.customer.prim_service_duration;
+                    // time =
+                    primary_servers.add_customer(ev.customer, eCPF_ev_time);
+                    event_q.add_event(eCustPrimaryFinished, eCPF_ev_time, ev.customer);
 
-                    Customer ca_cust;
-                    fin >> ca_cust.arrival_time >> ca_cust.prim_service_duration >> ca_cust.sec_service_duration;
+                    Customer next_arrival_cust;
+                    next_arrival_cust.cust_id = G_CUST_ID++;
+                    next_arrival_cust.server_id = -1;
+                    fin >> next_arrival_cust.arrival_time
+                        >> next_arrival_cust.prim_service_duration
+                        >> next_arrival_cust.sec_service_duration;
 
                     // break loop if 0, 0, 0 reached in sample.txt
-                    if (ca_cust.arrival_time == 0 && ca_cust.prim_service_duration == 0)
+                    if (next_arrival_cust.arrival_time == 0 && next_arrival_cust.prim_service_duration == 0)
                         cust_arrival_flag = false;
                     else
-                        event_q.add_event(eCustomerArrived, ca_cust.arrival_time, ca_cust );
+                        event_q.add_event(eCustomerArrived, next_arrival_cust.arrival_time, next_arrival_cust);
 
-                } else
+                } else {
+                    primary_servers.display();
+                    ev.customer.wait_time = primary_servers.server_wait_time();
                     prim_server_q.enqueue(ev.customer);
+                }
 
                 break;
             case eCustPrimaryFinished:
@@ -90,9 +104,12 @@ int main(int argc, const char* argv[])
                 if (secondary_servers.is_available()) {
                     // TODO: Need to check for waiting times
                     // arrival_time, waiting_prim_time, prim_service_time, waiting_sec_time, sec_service_time
-                    Time sf_ev_time = time + ev.event_time + ev.customer.sec_service_duration;
-                    event_q.add_event(eCustSecondaryFinished, sf_ev_time, ev.customer );
+                    Time eCSF_ev_time = ev.event_time + ev.customer.sec_service_duration;
+                    secondary_servers.add_customer(ev.customer, eCSF_ev_time);
+                    event_q.add_event(eCustSecondaryFinished, eCSF_ev_time, ev.customer );
                 } else {
+                    primary_servers.display();
+                    ev.customer.wait_time = secondary_servers.server_wait_time();
                     sec_server_q.enqueue(ev.customer);
                 }
                 break;
@@ -107,9 +124,8 @@ int main(int argc, const char* argv[])
             // TODO: Need to check for waiting times
             secondary_servers.display();
             cout << "Sec Server_Q ==> (ID: " << next_sec_cust.cust_id << ") Arrival: " << next_sec_cust.arrival_time << endl;
-                            next_sec_cust.sec_service_duration;
-
-            event_q.add_event(eCustSecondaryFinished, ev_time, next_sec_cust);
+            Time sec_server_q_ev_time = next_sec_cust.wait_time + next_sec_cust.sec_service_duration;
+            event_q.add_event(eCustSecondaryFinished, sec_server_q_ev_time, next_sec_cust);
 
             // TODO: do FIFO waiting time stats
         }
@@ -120,6 +136,7 @@ int main(int argc, const char* argv[])
             primary_servers.display();
             cout << "Prim Server_Q ==> (ID: " << next_prim_cust.cust_id << ") Wait: "<< next_prim_cust.wait_time
                  << " Arrival: " << next_prim_cust.arrival_time << endl;
+            Time prim_server_q_ev_time = next_prim_cust.wait_time;
             event_q.add_event(eCustPrimaryFinished, prim_server_q_ev_time, next_prim_cust);
 
             // TODO: do FIFO waiting time stats
