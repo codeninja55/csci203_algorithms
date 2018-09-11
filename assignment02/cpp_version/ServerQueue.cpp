@@ -49,6 +49,6 @@ void ServerQueue::display()
         int i;
         std::cout << "Queue elements are:" << std::endl;
         for (i = _head; i <= _tail; i++)
-            std::cout << _q[i].arrival_time << std::endl;
+            std::cout<<"(ID: "<<_q[i].cust_id<<") Arrival: "<< _q[i].arrival_time<<std::endl;
     }
 }

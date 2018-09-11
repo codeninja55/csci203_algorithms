@@ -35,7 +35,7 @@ void EventQueue::min_heapify(int i)
 void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
 {
     if (_n_events == _capacity - 1) {
-        std::cout << "Event Queue overflow." << std::endl;
+        std::cout << "Event queue overflow." << std::endl;
         return;
     }
 
@@ -43,6 +43,9 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     int i = _n_events - 1;
     Event new_event = { ev_type, ev_time, cust };
     _q[i] =  new_event;
+
+    // TODO: Testing
+    std::cout << "Ev added ==> {" << ev_type << "} : (ID: " << cust.cust_id << ") : " << ev_time << std::endl;
 
     // Fix min-heap property
     while (i != 0 && _q[PARENT(i)].customer.arrival_time > _q[i].customer.arrival_time) {
@@ -75,9 +78,10 @@ bool EventQueue::more_events() { return _n_events > 0; }
 void EventQueue::display()
 {
     int i;
-    std::cout << "Event Queue: " << std::endl;
+    std::cout << "Event_Q ==> ";
     for (i = 0; i < _n_events; i++)
-        std::cout << "Event: " << _q[i].event_time << std::endl;
+        std::cout<<"[ {"<<_q[i].type<<"} : (ID: "<<_q[i].customer.cust_id<<") : "<<_q[i].event_time<<" ] ";
+    std::cout<<std::endl;
 }
 
 void swap(Event *A, Event *B)
