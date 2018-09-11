@@ -124,8 +124,10 @@ void recursive_siftdown(int *heap, int i)
     if (left_child >= N_CTR) return;
     int min_index = i;
 
-    if (heap[i] < heap[left_child]) min_index = left_child;  // Look for larger of 2 children
-    if ((right_child < N_CTR) && (heap[min_index] < heap[right_child])) min_index = right_child;
+    if (heap[i] < heap[left_child])
+        min_index = left_child;  // Look for larger of 2 children
+    if ((right_child < N_CTR) && (heap[min_index] < heap[right_child]))
+        min_index = right_child;
 
     if (min_index != i) {
         swap(&heap[i], &heap[min_index]);
