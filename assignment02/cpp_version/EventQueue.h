@@ -11,12 +11,6 @@
 #define PARENT(i) ( (i-1) / 2 )
 #define LEFT(i) ( (i * 2) + 1 )
 #define RIGHT(i) ( (i * 2) + 2 )
-#define SWAP(x,y) do \
-   { unsigned char swap_temp[sizeof(x) == sizeof(y) ? (signed)sizeof(x) : -1]; \
-     memcpy(swap_temp,&y, sizeof(x)); \
-     memcpy(&y,&x,        sizeof(x)); \
-     memcpy(&x,swap_temp, sizeof(x)); \
-    } while(0)
 
 typedef double Time;
 
@@ -28,9 +22,9 @@ struct Customer {
 };
 
 struct Event {
-    EventType type;
-    Time event_time;
-    Customer customer;
+    EventType type;  // type of event
+    Time event_time;  // snapshot time of event
+    Customer customer;  // customer for event
 };
 
 typedef Event Event;
@@ -49,11 +43,10 @@ class EventQueue {
         void min_heapify(int i);
         // void siftup_queue(int i);
         // void build_priority_queue();
-        void swap(Event *A, Event *B);
 
-        int _N_EVENTS;
-        int _CAPACITY;
-        Event *_Q;
+        int _n_events;
+        int _capacity;
+        Event *_q;
 };
 
 #endif //ASSIGNMENT02_C_VERSION_EVENTQUEUE_H

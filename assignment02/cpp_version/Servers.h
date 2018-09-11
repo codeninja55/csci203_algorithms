@@ -26,9 +26,8 @@ class Servers {
         bool is_available();
 
     private:
-        Server *_IDLE;
-        int server_id;
-        int _CAPACITY;
+        Server *_idle;
+        int _capacity;
 };
 
 
