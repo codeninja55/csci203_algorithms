@@ -7,24 +7,28 @@
 
 #include "EventQueue.h"
 
-typedef double Time;
-
-typedef struct {
+struct Server {
     int id;
     bool busy;
     // stats
     int count;
-    Time last_customer_served, total_idle, total_service;
-} Server;
+    // Time last_customer_served, total_idle, total_service;
+};
+
+typedef Server Server;
 
 class Servers {
-    private:
-        explicit Servers(int size);
-        void add_customer(Customer c);
-        void remove_customer(int server_id);
-        bool is_available();
     public:
+        explicit Servers(int size);
+        void add_customer(Customer &c);
+        void remove_customer(int server_id);
+        int next_server();
+        bool is_available();
+
+    private:
         Server *_IDLE;
+        int server_id;
+        int _CAPACITY;
 };
 
 

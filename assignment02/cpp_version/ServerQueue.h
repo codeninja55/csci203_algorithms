@@ -9,7 +9,7 @@
 
 class ServerQueue {
     public:
-        ServerQueue(int size);
+        explicit ServerQueue(int size);
         void enqueue(Customer c);
         Customer dequeue();
         bool is_empty();

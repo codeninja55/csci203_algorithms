@@ -25,15 +25,15 @@ void ServerQueue::enqueue(Customer c)
 
 Customer ServerQueue::dequeue()
 {
+    Customer cust;
     if (_HEAD == -1) {
-        std::cout << "Queue is empty." << std::endl;
-        return NULL;
+        std::cout << "Server Queue is empty." << std::endl;
     } else {
-        Customer c = _Q[_HEAD];
+        cust = _Q[_HEAD];
         _HEAD++;
         if (_HEAD > _TAIL)
             _HEAD = _TAIL = -1;
-        return c;
+        return cust;
     }
 }
 

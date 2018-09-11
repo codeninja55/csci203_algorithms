@@ -32,7 +32,7 @@ void EventQueue::min_heapify(int i)
     }
 }
 
-void EventQueue::add_event(Event &ev)
+void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
 {
     if (_N_EVENTS == _CAPACITY - 1) {
         std::cout << "Event Queue overflow." << std::endl;
@@ -41,7 +41,8 @@ void EventQueue::add_event(Event &ev)
 
     _N_EVENTS++;
     int i = _N_EVENTS - 1;
-    _Q[i] =  ev;
+    Event new_event = { ev_type, ev_time, cust };
+    _Q[i] =  new_event;
 
     // Fix min-heap property
     while (i != 0 && _Q[PARENT(i)].customer.arrival_time > _Q[i].customer.arrival_time) {
@@ -55,10 +56,10 @@ Event EventQueue::peek_next_event()
     return _Q[0];
 }
 
-Event EventQueue::extract_next_event(Customer c, int &server_id)
+Event EventQueue::extract_next_event()
 {
     if (_N_EVENTS <= 0)
-        std::cout << "Heap underflow."<< std::endl;
+        std::cout << "Event Queue underflow."<< std::endl;
 
     if (_N_EVENTS == 1) {
         _N_EVENTS--;
@@ -77,6 +78,17 @@ void EventQueue::swap(Event *A, Event *B)
     Event temp = *A;
     *A = *B;
     *B = temp;
+}
+
+bool EventQueue::more_events() {
+    return _N_EVENTS > 0;
+}
+
+void EventQueue::display()
+{
+    int i;
+    for (i = 0; i < _N_EVENTS; i++)
+        std::cout << _Q[i].event_time << std::endl;
 }
 
 

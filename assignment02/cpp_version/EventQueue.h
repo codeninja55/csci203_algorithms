@@ -22,24 +22,29 @@ typedef double Time;
 
 enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryFinished = 2 };
 
-typedef struct {
+struct Customer {
     double arrival_time, prim_service_duration, sec_service_duration;
-} Customer;
+    int server_id;
+};
 
-typedef struct {
+struct Event {
     EventType type;
     Time event_time;
     Customer customer;
-    int server_id;
-} Event;
+};
+
+typedef Event Event;
+typedef Customer Customer;
 
 class EventQueue {
     public:
         explicit EventQueue(int size);  // initialiser
-        void add_event(Event &ev);
-        Event extract_next_event(Customer c, int &server_id);
+        void add_event(EventType ev_type, double ev_time, Customer &cust);
+        Event extract_next_event();
         Event peek_next_event();
+        bool more_events();
         // void decrease_key(Event ev, int i);
+        void display();
     private:
         void min_heapify(int i);
         // void siftup_queue(int i);
