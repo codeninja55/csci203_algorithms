@@ -11,20 +11,19 @@
 #define PARENT(i) ( (i-1) / 2 )
 #define LEFT(i) ( (i * 2) + 1 )
 #define RIGHT(i) ( (i * 2) + 2 )
-#define Time double
 #define Id int
 
 enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryFinished = 2 };
 
 struct Customer {
-    Time arrival_time, p_service_duration, s_service_duration;
-    Time wait_duration;
+    double arrival_time, p_service_duration, s_service_duration;
+    double wait_duration, p_queue_time, s_queue_time;
     Id id, server_id;
 };
 
 struct Event {
     EventType type;  // type of event
-    Time ev_time;  // snapshot time of event
+    double ev_time;  // snapshot time of event
     Customer cust;  // customer for event
 };
 

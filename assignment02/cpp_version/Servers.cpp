@@ -19,7 +19,7 @@ Servers::Servers(int size, char *name) : _capacity(size), _name(name)
     }
 }
 
-void Servers::add_customer(Customer &c, Time finish_time)
+void Servers::add_customer(Customer &c, double finish_time)
 {
     int next_server_id = next_server();
     if (next_server_id != -1) {
@@ -45,9 +45,9 @@ int Servers::next_server()
     return -1;
 }
 
-Time Servers::next_server_time() {
+double Servers::next_available_time() {
     int i;
-    Time wait_time = 9999999.9;
+    double wait_time = 9999999.9;
     for (i=0; i < _capacity; i++)
         wait_time = MIN(wait_time, _idle[i].finish_time);
     // TODO: Testing
