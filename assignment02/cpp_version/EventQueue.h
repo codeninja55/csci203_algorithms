@@ -1,11 +1,10 @@
 /*********************************************************************
 * CSCI203 - Assignment 02
-* ass2.cpp - C++ main() driver for implementation of Assignment 02
+* EventQueue.h - Header file for EventQueue.cpp
 * Author: Dinh Che (codeninja55) | andrew at codeninja55.me
 * UOW Details: Dinh Che (5721970) | dbac496 at uowmail.edu.au
-* Last modified: 2018.09.11
+* Last modified: 2018.09.12
 *********************************************************************/
-
 #ifndef ASSIGNMENT02_C_VERSION_EVENTQUEUE_H
 #define ASSIGNMENT02_C_VERSION_EVENTQUEUE_H
 #define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
@@ -15,20 +14,18 @@
 #define Time double
 #define Id int
 
-static int G_CUST_ID = 1;
-
 enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryFinished = 2 };
 
 struct Customer {
-    Time arrival_time, prim_service_duration, sec_service_duration;
+    Time arrival_time, p_service_duration, s_service_duration;
     Time wait_duration;
-    Id cust_id, server_id;
+    Id id, server_id;
 };
 
 struct Event {
     EventType type;  // type of event
-    Time event_time;  // snapshot time of event
-    Customer customer;  // customer for event
+    Time ev_time;  // snapshot time of event
+    Customer cust;  // customer for event
 };
 
 typedef Event Event;

@@ -1,9 +1,9 @@
 /*********************************************************************
 * CSCI203 - Assignment 02
-* ass2.cpp - C++ main() driver for implementation of Assignment 02
+* EventQueue.cpp - Implementation source code for Event priority queue
 * Author: Dinh Che (codeninja55) | andrew at codeninja55.me
 * UOW Details: Dinh Che (5721970) | dbac496 at uowmail.edu.au
-* Last modified: 2018.09.11
+* Last modified: 2018.09.12
 *********************************************************************/
 
 #include <iostream>
@@ -20,10 +20,10 @@ void EventQueue::min_heapify(int i)
 {
     int smallest = i;
 
-    if (LEFT(i) <= _n_events && _q[LEFT(i)].event_time < _q[i].event_time)
+    if (LEFT(i) <= _n_events && _q[LEFT(i)].ev_time < _q[i].ev_time)
         smallest = LEFT(i);
 
-    if (RIGHT(i) <= _n_events && _q[RIGHT(i)].event_time < _q[smallest].event_time)
+    if (RIGHT(i) <= _n_events && _q[RIGHT(i)].ev_time < _q[smallest].ev_time)
         smallest = RIGHT(i);
 
     if (smallest != i) {
@@ -44,10 +44,11 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     _q[i] =  new_event;
 
     // TODO: Testing
-    std::cout << "Ev added ==> {" << ev_type << "} : (ID: " << cust.cust_id << ") : " << ev_time << std::endl;
+    std::cout << "Event {" << ev_type << "} added ==>  : <ID " << cust.id
+              << "> : " << ev_time << std::endl;
 
     // Fix min-heap property
-    while (i != 0 && _q[PARENT(i)].event_time > _q[i].event_time) {
+    while (i != 0 && _q[PARENT(i)].ev_time > _q[i].ev_time) {
         swap(&_q[i], &_q[PARENT(i)]);
         i = PARENT(i);
     }
@@ -78,8 +79,10 @@ void EventQueue::display()
 {
     int i;
     std::cout << "Event_Q ==> ";
-    for (i = 0; i < _n_events; i++)
-        std::cout<<"[ {"<<_q[i].type<<"} : (ID: "<<_q[i].customer.cust_id<<") : "<<_q[i].event_time<<" ] ";
+    for (i = 0; i < _n_events; i++) {
+        std::cout<<"[ {"<<_q[i].type<<"} : <ID " << _q[i].cust.id
+                 << "> : " << _q[i].ev_time <<" ] --> ";
+    }
     std::cout<<std::endl;
 }
 

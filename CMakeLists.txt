@@ -3,7 +3,7 @@ project(Assignment02 CXX)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/assignment02)
-include_directories(${PROJECT_SOURCE_DIR}/assignment02/c_version)
+include_directories(${PROJECT_SOURCE_DIR}/assignment02/cpp_version)
 
 #target_link_libraries()
 
