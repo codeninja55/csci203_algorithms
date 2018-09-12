@@ -16,7 +16,7 @@ struct Server {
     bool busy;
     // stats
     int count, last_cust_served;
-    double finish_time, total_idle_time, total_service_time;
+    double last_ev_time, finish_time, total_idle_time, total_service_time;
 };
 
 typedef Server Server;
@@ -24,11 +24,12 @@ typedef Server Server;
 class Servers {
     public:
         explicit Servers(int size, char *name);
-        void add_customer(Customer &c, double finish_time);
+        void add_customer(Customer &c, double ev_time, double finish_time);
         void remove_customer(int server_id);
         int next_server();
         bool is_available();
         void display();
+        void display_idle_times();
     private:
         Server *_idle;
         char *_name;
