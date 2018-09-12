@@ -45,16 +45,6 @@ int Servers::next_server()
     return -1;
 }
 
-double Servers::next_available_time() {
-    int i;
-    double wait_time = 9999999.9;
-    for (i=0; i < _capacity; i++)
-        wait_time = MIN(wait_time, _idle[i].finish_time);
-    // TODO: Testing
-    std::cout << "Next available " << _name << " server time ==> " << wait_time << std::endl;
-    return wait_time;
-}
-
 bool Servers::is_available()
 {
     int i;
