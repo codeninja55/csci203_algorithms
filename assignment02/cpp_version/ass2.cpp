@@ -140,7 +140,7 @@ int main(int argc, const char* argv[])
                     event_q.add_event(eCustPrimaryFinished, eCPF_ev_time, ev.cust);
 
                 } else {
-                    ev.cust.wait_duration = p_servers.next_server_time() - ev.cust.arrival_time;
+                    ev.cust.p_queue_time = ev.ev_time;
 
                     // TODO: Testing
                     cout << "Waiting in p_Server_Q ==> {" << ev.type << "} : <ID " << ev.cust.id << "> "
@@ -158,11 +158,11 @@ int main(int argc, const char* argv[])
                 // TODO: do service time stats
 
                 if (s_servers.is_available()) {
-                    Time eCSF_ev_time = ev.ev_time + ev.cust.s_service_duration;
-                    s_servers.add_customer(ev.cust, eCSF_ev_time);
-                    event_q.add_event(eCustSecondaryFinished, eCSF_ev_time, ev.cust );
+                    double s_service_finish_time = ev.ev_time + ev.cust.s_service_duration;
+                    s_servers.add_customer(ev.cust, s_service_finish_time);
+                    event_q.add_event(eCustSecondaryFinished, s_service_finish_time, ev.cust );
                 } else {
-                    ev.cust.wait_duration = s_servers.next_server_time() - ev.ev_time;
+                    ev.cust.s_queue_time = ev.ev_time;
 
                     // TODO: Testing
                     cout << "Waiting in Secondary_Server_Q ==> {" << ev.type << "} : <ID "
@@ -189,16 +189,17 @@ int main(int argc, const char* argv[])
             Customer waiting_cust;
             waiting_cust = s_server_q.dequeue();
 
+            waiting_cust.wait_duration = ev.ev_time - waiting_cust.s_queue_time;
+            double s_server_finish_time = ev.ev_time + waiting_cust.s_service_duration;
+
             // TODO: Testing
             cout << "Secondary_Server_Q ==> <ID " << waiting_cust.id << "> Waited: "
                  << waiting_cust.wait_duration << endl;
 
-            Time s_server_q_ev_time = waiting_cust.arrival_time + waiting_cust.p_service_duration
-                    + waiting_cust.wait_duration + waiting_cust.s_service_duration;
-            event_q.add_event(eCustSecondaryFinished, s_server_q_ev_time, waiting_cust);
+            s_servers.add_customer(waiting_cust, s_server_finish_time);
+            event_q.add_event(eCustSecondaryFinished, s_server_finish_time, waiting_cust);
 
-            // TODO: do FIFO waiting time stats
-            s_server_q_wait_times += s_server_q_ev_time;
+            s_server_q_wait_times += waiting_cust.wait_duration;
         }
 
         // Check if there are any p servers available to process
@@ -207,16 +208,17 @@ int main(int argc, const char* argv[])
             Customer waiting_cust;
             waiting_cust = p_server_q.dequeue();
 
+            waiting_cust.wait_duration = ev.ev_time - waiting_cust.p_queue_time;
+            double p_server_finish_time = ev.ev_time + waiting_cust.p_service_duration;
+
             // TODO: Testing
             cout << "p_Server_Q ==> <ID " << waiting_cust.id << "> Waited: "
                  << waiting_cust.wait_duration << endl;
 
-            Time p_server_q_ev_time = waiting_cust.arrival_time + waiting_cust.wait_duration +
-                    waiting_cust.s_service_duration;
-            event_q.add_event(eCustPrimaryFinished, p_server_q_ev_time, waiting_cust);
+            p_servers.add_customer(waiting_cust, p_server_finish_time);
+            event_q.add_event(eCustPrimaryFinished, p_server_finish_time, waiting_cust);
 
-            // TODO: do FIFO waiting time stats
-            p_server_q_wait_times += p_server_q_ev_time;
+            p_server_q_wait_times += waiting_cust.wait_duration;  // accumulate waiting time stats
         }
     }
 
