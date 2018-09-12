@@ -37,13 +37,13 @@ int Servers::next_server()
     return -1;
 }
 
-Time Servers::server_wait_time() {
+Time Servers::next_server_time() {
     int i;
     Time wait_time = MAXDOUBLE;
     for (i=0; i < _capacity; i++)
         wait_time = MIN(wait_time, _idle[i].finish_time);
     // TODO: Testing
-    std::cout << "Wait Time: " << wait_time << std::endl;
+    std::cout << "Next available server time ==> " << wait_time << std::endl;
     return wait_time;
 }
 

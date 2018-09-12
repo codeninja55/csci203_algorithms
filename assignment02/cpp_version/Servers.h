@@ -25,7 +25,7 @@ class Servers {
         void add_customer(Customer &c, Time finish_time);
         void remove_customer(int server_id);
         int next_server();
-        Time server_wait_time();
+        Time next_server_time();
         bool is_available();
         void display();
     private:

@@ -8,6 +8,7 @@
 
 #ifndef ASSIGNMENT02_C_VERSION_EVENTQUEUE_H
 #define ASSIGNMENT02_C_VERSION_EVENTQUEUE_H
+#define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
 #define PARENT(i) ( (i-1) / 2 )
 #define LEFT(i) ( (i * 2) + 1 )
 #define RIGHT(i) ( (i * 2) + 2 )
@@ -20,7 +21,7 @@ enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryF
 
 struct Customer {
     Time arrival_time, prim_service_duration, sec_service_duration;
-    Time wait_time;
+    Time wait_duration;
     Id cust_id, server_id;
 };
 
@@ -40,13 +41,9 @@ class EventQueue {
         Event extract_next_event();
         Event peek_next_event();
         bool more_events();
-        // void decrease_key(Event ev, int i);
         void display();
     private:
         void min_heapify(int i);
-        // void siftup_queue(int i);
-        // void build_priority_queue();
-
         int _n_events;
         int _capacity;
         Event *_q;
