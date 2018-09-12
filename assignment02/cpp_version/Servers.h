@@ -15,10 +15,8 @@ struct Server {
     int id;
     bool busy;
     // stats
-    int count;
-    double finish_time;
-    int cust_id;
-    // Time last_customer_served, total_idle, total_service;
+    int count, last_cust_served;
+    double finish_time, total_idle_time, total_service_time;
 };
 
 typedef Server Server;

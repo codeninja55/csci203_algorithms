@@ -58,8 +58,8 @@ int main(int argc, const char* argv[])
     fin >> n_p_servers >> n_s_servers;
     char p_name[] = "Primary";
     char s_name[] = "Secondary";
-    Servers p_servers = Servers(n_p_servers, p_name);
-    Servers s_servers = Servers(n_s_servers, s_name);
+    Servers p_servers = Servers(n_p_servers, p_name);  // wrapper class for array of primary server structs
+    Servers s_servers = Servers(n_s_servers, s_name);  // wrapper class for array of secondary server structs
 
     // Initialise queues
     ServerQueue p_server_q = ServerQueue(4000, p_name);  // FIFO queue - waiting to be served by a p server

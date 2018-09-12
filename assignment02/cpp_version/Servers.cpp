@@ -14,7 +14,11 @@ Servers::Servers(int size, char *name) : _capacity(size), _name(name)
     _idle = new Server[size];
     int i;
     for (i = 0; i < _capacity; i++) {
-        Server new_server = { i, false, 0, 0, 0 };
+        Server new_server;
+        new_server.id = i;
+        new_server.busy = false;
+        new_server.finish_time = new_server.total_service_time = new_server.total_idle_time = 0;
+        new_server.last_cust_served = new_server.count = 0;
         _idle[i] = new_server;
     }
 }
@@ -27,14 +31,14 @@ void Servers::add_customer(Customer &c, double finish_time)
         _idle[next_server_id].busy = true;
         _idle[next_server_id].finish_time = finish_time;
         _idle[next_server_id].count++;
-        _idle[next_server_id].cust_id = c.id;
+        _idle[next_server_id].last_cust_served = c.id;
     }
 }
 
 void Servers::remove_customer(int server_id) {
     _idle[server_id].busy = false;
     _idle[server_id].finish_time = 0;
-    // _idle[server_id].cust_id = 0;  // leave this commented to see last cust_id served
+    // _idle[server_id].last_cust_served = 0;  // leave this commented to see last cust_id served
 }
 
 int Servers::next_server()
@@ -58,7 +62,7 @@ void Servers::display()
     int i;
     std::cout << _name << "_Servers ==> ";
     for (i = 0; i < _capacity; i++)
-        std::cout<< "[ {" << _idle[i].id << "} <ID " <<_idle[i].cust_id << "> : Finish: " << _idle[i].finish_time << " ] ";
+        std::cout<< "[ {" << _idle[i].id << "} <ID " <<_idle[i].last_cust_served << "> : Finish: " << _idle[i].finish_time << " ] ";
     std::cout<<std::endl;
 }
 
