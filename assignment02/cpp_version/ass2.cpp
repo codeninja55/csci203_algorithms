@@ -67,10 +67,10 @@ int main(int argc, const char* argv[])
     EventQueue event_q = EventQueue(2000);  // Priority queue implemented as a heap with an array - main event queue
 
     // Statistic counters
-    Time total_service_time = 0;
-    Time avg_total_service_time = 0;
-    Time p_server_q_wait_times = 0;
-    Time s_server_q_wait_times = 0;
+    double last_service_completed, total_service_time, avg_total_service_time;
+    double p_server_q_wait_times, s_server_q_wait_times;
+    last_service_completed = total_service_time = avg_total_service_time = 0;
+    p_server_q_wait_times = s_server_q_wait_times = 0;
 
     bool cust_arrival_flag = true;  // flag to be changed if no other events to read from file
 
@@ -98,24 +98,7 @@ int main(int argc, const char* argv[])
 
         // the top priority event based on event_time when added
         Event ev = event_q.extract_next_event();
-        cout << "Processing ==> {" << ev.type << "} <ID " << ev.cust.id << "> : Event Time: " << ev.ev_time << endl;
-
-        // read next customer from file and put them in event_q on arrival_time
-        if (cust_arrival_flag) {
-            Customer next_read_cust;
-            fin >> next_read_cust.arrival_time
-                >> next_read_cust.p_service_duration
-                >> next_read_cust.s_service_duration;
-
-            // break loop if 0, 0, 0 reached in sample.txt and close file
-            if (next_read_cust.arrival_time == 0.0 && next_read_cust.p_service_duration == 0.0) {
-                cust_arrival_flag = false;
-                fin.close();
-            } else {
-                next_read_cust.id = GLOBAL_CUST_ID++;
-                event_q.add_event(eCustomerArrived, next_read_cust.arrival_time, next_read_cust);
-            }
-        }
+        cout << "Processing ==> {" << ev.type << "} <ID " << ev.cust.id << "> : Event double: " << ev.ev_time << endl;
 
         /* Events are either:
          *  eCustomerArrived
@@ -131,19 +114,34 @@ int main(int argc, const char* argv[])
          * */
         switch (ev.type) {
             case eCustomerArrived:
+                // read next customer from file and put them in event_q on arrival_time
+                if (cust_arrival_flag) {
+                    Customer next_read_cust;
+                    fin >> next_read_cust.arrival_time
+                        >> next_read_cust.p_service_duration
+                        >> next_read_cust.s_service_duration;
 
-                // p server in _idle[] available to serve next customer
-                if (p_servers.is_available()) {
+                    // break loop if 0, 0, 0 reached in sample.txt and close file
+                    if (next_read_cust.arrival_time == 0.0 && next_read_cust.p_service_duration == 0.0) {
+                        cust_arrival_flag = false;
+                        fin.close();
+                    } else {
+                        next_read_cust.id = GLOBAL_CUST_ID++;
+                        event_q.add_event(eCustomerArrived, next_read_cust.arrival_time, next_read_cust);
+                    }
+                }
 
-                    Time eCPF_ev_time = ev.cust.arrival_time + ev.cust.p_service_duration;
-                    p_servers.add_customer(ev.cust, eCPF_ev_time);
-                    event_q.add_event(eCustPrimaryFinished, eCPF_ev_time, ev.cust);
+                if (p_servers.is_available()) {  // p server in array with busy flag set to false
+
+                    double p_service_finish_time = ev.cust.arrival_time + ev.cust.p_service_duration;
+                    p_servers.add_customer(ev.cust, p_service_finish_time);
+                    event_q.add_event(eCustPrimaryFinished, p_service_finish_time, ev.cust);
 
                 } else {
                     ev.cust.p_queue_time = ev.ev_time;
 
                     // TODO: Testing
-                    cout << "Waiting in p_Server_Q ==> {" << ev.type << "} : <ID " << ev.cust.id << "> "
+                    cout << "Waiting in Primary_Server_Q ==> {" << ev.type << "} : <ID " << ev.cust.id << "> "
                          << ": Event Time: " << ev.ev_time << " : Waiting till: "
                          << ev.ev_time + ev.cust.wait_duration << endl;
 
@@ -153,6 +151,7 @@ int main(int argc, const char* argv[])
                 break;
 
             case eCustPrimaryFinished:
+                // free up a server in primary server array
                 p_servers.remove_customer(ev.cust.server_id);
 
                 // TODO: do service time stats
@@ -175,15 +174,17 @@ int main(int argc, const char* argv[])
                 break;
 
             case eCustSecondaryFinished:
+                // free up a server in secondary server array
                 s_servers.remove_customer(ev.cust.server_id);
 
                 // TODO: do service time stats
-                total_service_time += ev.ev_time;
+
+                // total_service_time += ev.ev_time;
 
                 break;
         }
 
-        // Check if there are any s servers available to process
+        // Check if there are any secondary servers available to process
         // someone in queue if there is a queue
         if (!s_server_q.is_empty() && s_servers.is_available()) {
             Customer waiting_cust;
@@ -202,7 +203,7 @@ int main(int argc, const char* argv[])
             s_server_q_wait_times += waiting_cust.wait_duration;
         }
 
-        // Check if there are any p servers available to process
+        // Check if there are any primary servers available to process
         // someone in queue if there is a queue
         if (!p_server_q.is_empty() && p_servers.is_available()) {
             Customer waiting_cust;
@@ -225,7 +226,7 @@ int main(int argc, const char* argv[])
     cout << "|===============| Simulation Statistics |===============|" << endl;
 
     cout << "Total Number of People Served: " << GLOBAL_CUST_ID - 1 << endl;
-    cout << "Total p Server Wait Time: " << p_server_q_wait_times << endl;
+    cout << "Total Primary Server Wait Time: " << p_server_q_wait_times << endl;
     cout << "Total Secondary Server Wait Time: " << s_server_q_wait_times << endl;
     cout << "Time Last Service Completed: " << endl;
     cout << "Total Service Time: " << total_service_time << endl;
