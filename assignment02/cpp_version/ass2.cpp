@@ -64,6 +64,7 @@ int main(int argc, const char* argv[])
 
     // Main event loop
     while (event_q.more_events()) {
+        cout << "|== " << fixed << setprecision(3) << event_q.peek_next_event().event_time << setw(4) << " ==|  ";
         event_q.display();
         Event ev = event_q.extract_next_event();
         cout << "Processing ==> (ID: " << ev.customer.cust_id << ") [" << ev.type << "] Event Time: " << ev.event_time << endl;
@@ -72,7 +73,6 @@ int main(int argc, const char* argv[])
             case eCustomerArrived:
                 if (primary_servers.is_available()) {
                     Time eCPF_ev_time = ev.customer.arrival_time + ev.customer.prim_service_duration;
-                    // time =
                     primary_servers.add_customer(ev.customer, eCPF_ev_time);
                     event_q.add_event(eCustPrimaryFinished, eCPF_ev_time, ev.customer);
 
@@ -90,8 +90,10 @@ int main(int argc, const char* argv[])
                         event_q.add_event(eCustomerArrived, next_arrival_cust.arrival_time, next_arrival_cust);
 
                 } else {
+                    cout << "Waiting in Prim_Q ==> (ID: " << ev.customer.cust_id << ") [" << ev.type << "] Event Time: "
+                         << ev.event_time << endl;
                     primary_servers.display();
-                    ev.customer.wait_time = primary_servers.server_wait_time();
+                    ev.customer.wait_duration = primary_servers.next_server_time() - ev.customer.arrival_time;
                     prim_server_q.enqueue(ev.customer);
                 }
 
@@ -102,14 +104,14 @@ int main(int argc, const char* argv[])
                 // TODO: do service time stats
 
                 if (secondary_servers.is_available()) {
-                    // TODO: Need to check for waiting times
-                    // arrival_time, waiting_prim_time, prim_service_time, waiting_sec_time, sec_service_time
                     Time eCSF_ev_time = ev.event_time + ev.customer.sec_service_duration;
                     secondary_servers.add_customer(ev.customer, eCSF_ev_time);
                     event_q.add_event(eCustSecondaryFinished, eCSF_ev_time, ev.customer );
                 } else {
-                    primary_servers.display();
-                    ev.customer.wait_time = secondary_servers.server_wait_time();
+                    cout << "Waiting in Sec_Q ==> (ID: " << ev.customer.cust_id << ") [" << ev.type << "] Event Time: "
+                         << ev.event_time << endl;
+                    secondary_servers.display();
+                    ev.customer.wait_duration = secondary_servers.next_server_time() - ev.event_time;
                     sec_server_q.enqueue(ev.customer);
                 }
                 break;
@@ -120,31 +122,29 @@ int main(int argc, const char* argv[])
         }
 
         if (!sec_server_q.is_empty() && secondary_servers.is_available()) {
-            Customer next_sec_cust = sec_server_q.dequeue();
+            Customer waiting_cust;
+            waiting_cust = sec_server_q.dequeue();
             // TODO: Need to check for waiting times
-            secondary_servers.display();
-            cout << "Sec Server_Q ==> (ID: " << next_sec_cust.cust_id << ") Arrival: " << next_sec_cust.arrival_time << endl;
-            Time sec_server_q_ev_time = next_sec_cust.wait_time + next_sec_cust.sec_service_duration;
-            event_q.add_event(eCustSecondaryFinished, sec_server_q_ev_time, next_sec_cust);
+            cout << "Sec Server_Q ==> (ID: " << waiting_cust.cust_id << ") Waited: " << waiting_cust.wait_duration << endl;
+            Time sec_server_q_ev_time = waiting_cust.arrival_time + waiting_cust.prim_service_duration
+                    + waiting_cust.wait_duration + waiting_cust.sec_service_duration;
+            event_q.add_event(eCustSecondaryFinished, sec_server_q_ev_time, waiting_cust);
 
             // TODO: do FIFO waiting time stats
         }
 
         if (!prim_server_q.is_empty() && primary_servers.is_available()) {
-            Customer next_prim_cust = prim_server_q.dequeue();
+            Customer waiting_cust;
+            waiting_cust = prim_server_q.dequeue();
             // TODO: Need to check for waiting times
-            primary_servers.display();
-            cout << "Prim Server_Q ==> (ID: " << next_prim_cust.cust_id << ") Wait: "<< next_prim_cust.wait_time
-                 << " Arrival: " << next_prim_cust.arrival_time << endl;
-            Time prim_server_q_ev_time = next_prim_cust.wait_time;
-            event_q.add_event(eCustPrimaryFinished, prim_server_q_ev_time, next_prim_cust);
+            cout << "Prim Server_Q ==> (ID: " << waiting_cust.cust_id << ") Waited: "<< waiting_cust.wait_duration << endl;
+            Time prim_server_q_ev_time = waiting_cust.arrival_time + waiting_cust.wait_duration + waiting_cust.sec_service_duration;
+            event_q.add_event(eCustPrimaryFinished, prim_server_q_ev_time, waiting_cust);
 
             // TODO: do FIFO waiting time stats
         }
 
     }
-
-    // event_q.display();
 
     /* TODO: Output, to standard output will consist of the following data:
      *  - Number of people served. -->
