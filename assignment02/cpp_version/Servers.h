@@ -28,8 +28,7 @@ class Servers {
         void remove_customer(int server_id);
         int next_server();
         bool is_available();
-        void display();
-        void display_idle_times();
+        void display_server_statistics();
     private:
         Server *_idle;
         char *_name;

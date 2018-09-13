@@ -67,16 +67,7 @@ bool Servers::is_available()
     return false;
 }
 
-void Servers::display()
-{
-    int i;
-    std::cout << _name << "_Servers ==> ";
-    for (i = 0; i < _capacity; i++)
-        std::cout<< "[ {" << _idle[i].id << "} <ID " <<_idle[i].last_cust_served << "> : Finish: " << _idle[i].finish_time << " ] ";
-    std::cout<<std::endl;
-}
-
-void Servers::display_idle_times()
+void Servers::display_server_statistics()
 {
     int i;
     cout << "Idle times for " << _name << " servers:" << endl;

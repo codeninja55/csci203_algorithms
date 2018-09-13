@@ -45,16 +45,3 @@ Customer ServerQueue::dequeue()
 int ServerQueue::size() { return _n_customers; }
 
 bool ServerQueue::is_empty() { return _tail == -1; }
-
-void ServerQueue::display()
-{
-    if (_tail == -1)
-        std::cout << _name << "_Server_Q is empty" << std::endl;
-    else {
-        int i;
-        std::cout << _name << "_Server_Q (n: " << size() << ") ==>" ;
-        for (i = _head; i <= _tail; i++)
-            std::cout<<"[ <ID "<<_q[i].id<<"> Arrival: "<< _q[i].arrival_time << " ] ";
-        std::cout << std::endl;
-    }
-}

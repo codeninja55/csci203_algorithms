@@ -36,7 +36,6 @@ class EventQueue {
         Event extract_next_event();
         Event peek_next_event();
         bool more_events();
-        void display();
     private:
         void min_heapify(int i);
         int _n_events;

@@ -95,16 +95,6 @@ int main(int argc, const char* argv[])
 
     // main simulation event loop
     while (event_q.more_events()) {  // check if there are any more events waiting to be processed
-
-        // TODO: Testing
-        cout << "\n|=== " << event_q.peek_next_event().ev_time << " ===|\n";
-        /*event_q.display();
-        p_servers.display();
-        p_server_q.display();
-        s_servers.display();
-        s_server_q.display();
-        cout<<endl;*/
-
         // the top priority event based on event_time when added
         Event ev = event_q.extract_next_event();
         cout << "Processing ==> {" << ev.type << "} <ID " << ev.cust.id << "> : Event double: " << ev.ev_time << endl;
@@ -147,12 +137,6 @@ int main(int argc, const char* argv[])
                     event_q.add_event(eCustPrimaryFinished, p_service_finish_time, ev.cust);
                 } else {
                     ev.cust.p_queue_time = ev.ev_time;
-
-                    // TODO: Testing
-                    cout << "Waiting in Primary_Server_Q ==> {" << ev.type << "} : <ID " << ev.cust.id << "> "
-                         << ": Event Time: " << ev.ev_time << " : Waiting till: "
-                         << ev.ev_time + ev.cust.wait_duration << endl;
-
                     p_server_q.enqueue(ev.cust);
                     p_server_n_cust++;
                 }
@@ -172,12 +156,6 @@ int main(int argc, const char* argv[])
                     event_q.add_event(eCustSecondaryFinished, s_service_finish_time, ev.cust );
                 } else {
                     ev.cust.s_queue_time = ev.ev_time;
-
-                    // TODO: Testing
-                    cout << "Waiting in Secondary_Server_Q ==> {" << ev.type << "} : <ID "
-                         << ev.cust.id << "> " << ": Event Time: " << ev.ev_time << " : Waiting till: "
-                         << ev.ev_time + ev.cust.wait_duration << endl;
-
                     s_server_q.enqueue(ev.cust);
                     s_server_n_cust++;
                 }
@@ -205,10 +183,6 @@ int main(int argc, const char* argv[])
             waiting_cust.wait_duration = ev.ev_time - waiting_cust.s_queue_time;
             double s_server_finish_time = ev.ev_time + waiting_cust.s_service_duration;
 
-            // TODO: Testing
-            cout << "Secondary_Server_Q ==> <ID " << waiting_cust.id << "> Waited: "
-                 << waiting_cust.wait_duration << endl;
-
             s_servers.add_customer(waiting_cust, ev.ev_time, s_server_finish_time);
             event_q.add_event(eCustSecondaryFinished, s_server_finish_time, waiting_cust);
 
@@ -224,10 +198,6 @@ int main(int argc, const char* argv[])
             waiting_cust.wait_duration = ev.ev_time - waiting_cust.p_queue_time;
             double p_server_finish_time = ev.ev_time + waiting_cust.p_service_duration;
 
-            // TODO: Testing
-            cout << "P_Server_Q ==> <ID " << waiting_cust.id << "> Waited: "
-                 << waiting_cust.wait_duration << endl;
-
             p_servers.add_customer(waiting_cust, ev.ev_time, p_server_finish_time);
             event_q.add_event(eCustPrimaryFinished, p_server_finish_time, waiting_cust);
 
@@ -236,8 +206,8 @@ int main(int argc, const char* argv[])
     }
 
     print_statistics();
-    p_servers.display_idle_times();
-    s_servers.display_idle_times();
+    p_servers.display_server_statistics();
+    s_servers.display_server_statistics();
 
 
     /* TODO: Output, to standard output will consist of the following data:

@@ -18,7 +18,6 @@ class ServerQueue {
         Customer dequeue();
         int size();
         bool is_empty();
-        void display();
     private:
         int _head, _tail, _capacity, _n_customers;
         Customer *_q;
