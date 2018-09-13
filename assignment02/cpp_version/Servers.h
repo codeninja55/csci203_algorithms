@@ -23,8 +23,8 @@ typedef Server Server;
 
 class Servers {
     public:
-        explicit Servers(int size, char *name);
-        void add_customer(Customer &c, double ev_time, double finish_time);
+        explicit Servers(int size, char *name);  // main initialiser
+        void add_customer(Customer &c, double start_time, double finish_time);
         void remove_customer(int server_id);
         int next_server();
         bool is_available();

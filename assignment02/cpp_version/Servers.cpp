@@ -24,26 +24,28 @@ Servers::Servers(int size, char *name) : _capacity(size), _name(name)
     }
 }
 
-void Servers::add_customer(Customer &c, double ev_time,  double finish_time)
+void Servers::add_customer(Customer &c, double start_time,  double finish_time)
 {
-    int next_server_id = next_server();
-    if (next_server_id != -1) {
-        c.server_id = next_server_id;
-        _idle[next_server_id].busy = true;
+    int server_id = next_server();
+    if (server_id != -1) {
+        c.server_id = server_id;
+        _idle[server_id].busy = true;
 
         // TODO
-        double last_service_time = _idle[next_server_id].last_ev_time;
-        _idle[next_server_id].total_idle_time += ev_time - last_service_time;
+        double last_finish_time = _idle[server_id].finish_time;
 
-        _idle[next_server_id].total_service_time += ev_time - finish_time;
-        _idle[next_server_id].finish_time = finish_time;
-        _idle[next_server_id].last_ev_time = ev_time;
-        _idle[next_server_id].count++;
-        _idle[next_server_id].last_cust_served = c.id;
+        _idle[server_id].total_idle_time += (last_finish_time - start_time);
+        _idle[server_id].total_service_time += (finish_time - start_time);  // this service time accumulated
+
+        _idle[server_id].finish_time = finish_time;
+        _idle[server_id].last_ev_time = start_time;
+        _idle[server_id].count++;
+        _idle[server_id].last_cust_served = c.id;
     }
 }
 
-void Servers::remove_customer(int server_id) {
+void Servers::remove_customer(int server_id)
+{
     _idle[server_id].busy = false;
     _idle[server_id].finish_time = 0;
     // _idle[server_id].last_cust_served = 0;  // leave this commented to see last cust_id served
@@ -77,6 +79,7 @@ void Servers::display()
 void Servers::display_idle_times()
 {
     int i;
+    cout << "Idle times for " << _name << " servers:" << endl;
     cout << "|--------|-----------------|--------------------|" << endl;
     cout << left << setw(10) << "| Server |"
          << setw(18) << " Total Idle Time |"

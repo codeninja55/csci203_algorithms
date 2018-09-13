@@ -22,6 +22,9 @@ using namespace std;
 /*====================| STRUCT AND ENUM DEFINITIONS |====================*/
 
 
+/*====================| FUNCTION PROTOTYPES |====================*/
+void print_statistics();
+
 /*====================| CLASS DEFINITIONS |====================*/
 
 
@@ -30,6 +33,10 @@ using namespace std;
 
 /*====================| GLOBAL DEFINITIONS |====================*/
 static int GLOBAL_CUST_ID = 1;
+double last_service_completed, total_service_time, p_server_q_wait_times, s_server_q_wait_times;
+int p_server_n_cust, s_server_n_cust;
+// int ev_max_length_q, p_max_length_q, s_max_length_q, overall_max_length_q;
+// int ev_avg_length_q, p_avg_length_q, s_avg_length_q, overall_avg_length_q;
 
 
 int main(int argc, const char* argv[])
@@ -67,17 +74,11 @@ int main(int argc, const char* argv[])
     ServerQueue s_server_q = ServerQueue(5000, s_name);  // FIFO queue - waiting to be served by a s server
     EventQueue event_q = EventQueue(2000);  // Priority queue implemented as a heap with an array - main event queue
 
-    // Statistic counters
-    double last_service_completed, total_service_time, p_server_q_wait_times, s_server_q_wait_times;
+    // Statistic counters initialisers
     last_service_completed = total_service_time = p_server_q_wait_times = s_server_q_wait_times = 0;
-
-    int p_server_n_cust, s_server_n_cust;
     p_server_n_cust = s_server_n_cust = 0;
-
-    int ev_max_length_q, p_max_length_q, s_max_length_q, overall_max_length_q;
-    ev_max_length_q = p_max_length_q = s_max_length_q = overall_max_length_q = 0;
-    int ev_avg_length_q, p_avg_length_q, s_avg_length_q, overall_avg_length_q;
-    ev_avg_length_q = p_avg_length_q = s_avg_length_q = overall_avg_length_q = 0;
+    // ev_max_length_q = p_max_length_q = s_max_length_q = overall_max_length_q = 0;
+    // ev_avg_length_q = p_avg_length_q = s_avg_length_q = overall_avg_length_q = 0;
 
     bool cust_arrival_flag = true;  // flag to be changed if no other events to read from file
 
@@ -97,12 +98,12 @@ int main(int argc, const char* argv[])
 
         // TODO: Testing
         cout << "\n|=== " << event_q.peek_next_event().ev_time << " ===|\n";
-        event_q.display();
+        /*event_q.display();
         p_servers.display();
         p_server_q.display();
         s_servers.display();
         s_server_q.display();
-        cout<<endl;
+        cout<<endl;*/
 
         // the top priority event based on event_time when added
         Event ev = event_q.extract_next_event();
@@ -117,7 +118,7 @@ int main(int argc, const char* argv[])
          *      - customer is served by a s server if available, and event_time is set to when service completed
          *      - customer is put in a s server FIFO queue if no server available, wait duration till next
          *        server available is calculated and stored.
- *       * eCustSecondaryFinished - customer has finished with a s server and being served
+         * eCustSecondaryFinished - customer has finished with a s server and being served
          *      - statistics are calculated
          * */
         switch (ev.type) {
@@ -163,7 +164,7 @@ int main(int argc, const char* argv[])
                 p_servers.remove_customer(ev.cust.server_id);
 
                 // TODO: do service time stats
-                total_service_time += ev.cust.p_service_duration + ev.cust.wait_duration;  // wait_duration only for p
+                total_service_time += (ev.cust.p_service_duration + ev.cust.wait_duration);  // wait_duration only for p
 
                 if (s_servers.is_available()) {
                     double s_service_finish_time = ev.ev_time + ev.cust.s_service_duration;
@@ -187,11 +188,10 @@ int main(int argc, const char* argv[])
                 // free up a server in secondary server array
                 s_servers.remove_customer(ev.cust.server_id);
 
-
                 // TODO: do service time stats
-                if (!event_q.more_events())
-                    last_service_completed = ev.ev_time;
-                total_service_time += ev.cust.s_service_duration + ev.cust.wait_duration;
+                if (!event_q.more_events()) last_service_completed = ev.ev_time;
+
+                total_service_time += (ev.cust.s_service_duration + ev.cust.wait_duration);
 
                 break;
         }
@@ -235,46 +235,9 @@ int main(int argc, const char* argv[])
         }
     }
 
-    int n_total_cust = GLOBAL_CUST_ID - 1;
-    cout << "|=======| Assignment 02 -- Simulation Statistics  |=======|" << endl << endl;
-
-    cout << left << setfill('.') << setw(50) << "Total Number of People Served:" << " "
-         << GLOBAL_CUST_ID - 1 << endl;
-    cout << left << setfill('.') << setw(50) << "Time Last Service Completed:" << " "
-         << last_service_completed << endl << endl;
-
-    cout << left << setfill('.')  << setw(50) << "Total Service Time:" << " "
-         << total_service_time << endl;
-    cout << left << setfill('.')  << setw(50) << "Average Total Service Time:" << " "
-         << total_service_time / n_total_cust << endl << endl;
-
-    cout << left << setfill('.')  << setw(50) << "Overall Average Total Time in Queues:" << " "
-         << (p_server_q_wait_times + s_server_q_wait_times) / (p_server_n_cust + s_server_n_cust) << endl;
-    cout << left << setfill('.')  << setw(50) << "Average Time in Primary Server Queue:" << " "
-         << p_server_q_wait_times / p_server_n_cust << endl;
-    cout << left << setfill('.')  << setw(50) << "Average Time in Secondary Server Queue:" << " "
-         << s_server_q_wait_times / s_server_n_cust << endl << endl;
-
-    // TODO
-    cout << left << setfill('.')  << setw(50) << "Max Length of Overall Event Queue:" << " "
-         << endl;
-    cout << left << setfill('.')  << setw(50) << "Average Length of Overall Event Queue:" << " "
-         << endl << endl;
-
-    cout << left << setfill('.')  << setw(50) << "Max Length of Primary Server Queue:" << " "
-         << endl;
-    cout << left << setfill('.')  << setw(50) << "Average Length of Primary Server Queue:" << " "
-         << endl << endl;
-
-    cout << left << setw(50) << "Max Length of Secondary Server Queue:" << " "
-         << endl;
-    cout << left << setw(50) << "Average Length of Secondary Server Queue:" << " "
-         << endl << endl;
-
-    cout << setfill(' ') << left << setw(50) << "Total Idle Times for Servers: " << endl << endl;
+    print_statistics();
     p_servers.display_idle_times();
     s_servers.display_idle_times();
-
 
 
     /* TODO: Output, to standard output will consist of the following data:
@@ -288,3 +251,46 @@ int main(int argc, const char* argv[])
     return 0;
 }
 
+void print_statistics()
+{
+    int n_total_cust = GLOBAL_CUST_ID - 1;
+    cout << "\n\n|=======| Assignment 02 -- Simulation Statistics  |=======|" << endl << endl;
+
+    cout << left << setfill('.') << setw(50) << "Total Number of People Served:" << " "
+         << n_total_cust << endl;
+    cout << left << setw(50) << "Time Last Service Completed:" << " "
+         << last_service_completed << endl << endl;
+
+    cout << left << setw(50) << "Total Service Time:" << " "
+         << total_service_time << endl;
+    cout << left << setw(50) << "Average Total Service Time:" << " "
+         << total_service_time / n_total_cust << endl << endl;
+
+    cout << left << setw(50) << "Total Time in Queues:" << " "
+         << ((p_server_q_wait_times + s_server_q_wait_times) / (p_server_n_cust + s_server_n_cust))
+            * (p_server_n_cust + s_server_n_cust) << endl;
+    cout << left << setw(50) << "Overall Average Total Time in Queues:" << " "
+         << (p_server_q_wait_times + s_server_q_wait_times) / (p_server_n_cust + s_server_n_cust) << endl;
+    cout << left << setw(50) << "Average Time in Primary Server Queue:" << " "
+         << p_server_q_wait_times / p_server_n_cust << endl;
+    cout << left << setw(50) << "Average Time in Secondary Server Queue:" << " "
+         << s_server_q_wait_times / s_server_n_cust << endl << endl;
+
+    // TODO
+    cout << left << setw(50) << "Max Length of Overall Event Queue:" << " "
+         << endl;
+    cout << left << setw(50) << "Average Length of Overall Event Queue:" << " "
+         << endl << endl;
+
+    cout << left << setw(50) << "Max Length of Primary Server Queue:" << " "
+         << endl;
+    cout << left << setw(50) << "Average Length of Primary Server Queue:" << " "
+         << endl << endl;
+
+    cout << left << setw(50) << "Max Length of Secondary Server Queue:" << " "
+         << endl;
+    cout << left << setw(50) << "Average Length of Secondary Server Queue:" << " "
+         << endl << endl;
+
+    cout << setfill(' ') << left << setw(50) << "Total Idle Times for Servers: " << endl << endl;
+}

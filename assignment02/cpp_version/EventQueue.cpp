@@ -44,7 +44,7 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     _q[i] =  new_event;
 
     // TODO: Testing
-    std::cout << "Event {" << ev_type << "} added ==>  : <ID " << cust.id
+    std::cout << "Event {" << ev_type << "} added ==> <ID " << cust.id
               << "> : " << ev_time << std::endl;
 
     // Fix min-heap property
