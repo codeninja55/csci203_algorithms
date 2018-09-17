@@ -32,7 +32,7 @@ void print_statistics();
 
 
 /*====================| GLOBAL DEFINITIONS |====================*/
-static int GLOBAL_CUST_ID = 1;
+int n_total_cust;
 double last_service_completed, total_service_time, p_server_q_wait_times, s_server_q_wait_times;
 int p_server_n_cust, s_server_n_cust;
 // int ev_max_length_q, p_max_length_q, s_max_length_q, overall_max_length_q;
@@ -75,6 +75,7 @@ int main(int argc, const char* argv[])
     EventQueue event_q = EventQueue(2000);  // Priority queue implemented as a heap with an array - main event queue
 
     // Statistic counters initialisers
+    n_total_cust = 0;
     last_service_completed = total_service_time = p_server_q_wait_times = s_server_q_wait_times = 0;
     p_server_n_cust = s_server_n_cust = 0;
     // ev_max_length_q = p_max_length_q = s_max_length_q = overall_max_length_q = 0;
@@ -84,7 +85,6 @@ int main(int argc, const char* argv[])
 
     // Read first customer from file
     Customer first_cust;
-    first_cust.id = GLOBAL_CUST_ID++;  // TODO: may not need this later so can remove
     first_cust.wait_duration = 0;
     fin >> first_cust.arrival_time
         >> first_cust.p_service_duration
@@ -98,7 +98,7 @@ int main(int argc, const char* argv[])
         // the top priority event based on event_time when added
         Event ev = event_q.extract_next_event();
 
-        cout << "<ID " << ev.cust.id << "> {Type  " << ev.type << "} ==> Process time: "
+        cout << "> {Type  " << ev.type << "} ==> Process time: "
         << ev.ev_time << endl;
 
         /* Events are either:
@@ -127,7 +127,6 @@ int main(int argc, const char* argv[])
                         cust_arrival_flag = false;
                         fin.close();
                     } else {
-                        next_read_cust.id = GLOBAL_CUST_ID++;
                         next_read_cust.wait_duration = 0;
                         event_q.add_event(eCustomerArrived, next_read_cust.arrival_time, next_read_cust);
                     }
@@ -167,6 +166,7 @@ int main(int argc, const char* argv[])
             case eCustSecondaryFinished:
                 // free up a server in secondary server array
                 s_servers.remove_customer(ev.cust.server_idx);
+                n_total_cust++;
                 // TODO: do service time stats
                 if (!event_q.more_events()) last_service_completed = ev.ev_time;
                 total_service_time += (ev.cust.s_service_duration + ev.cust.wait_duration);
@@ -221,7 +221,6 @@ int main(int argc, const char* argv[])
 
 void print_statistics()
 {
-    int n_total_cust = GLOBAL_CUST_ID - 1;
     cout << "\n\n|=======| Assignment 02 -- Simulation Statistics  |=======|" << endl << endl;
 
     cout << setprecision(8) << left << setfill('.') << setw(50) << "Total Number of People Served:" << " "
@@ -258,7 +257,6 @@ void print_statistics()
     cout << left << setw(50) << "Max Length of Secondary Server Queue:" << " "
          << endl;
     cout << left << setw(50) << "Average Length of Secondary Server Queue:" << " "
-         << endl << endl;
+         << endl << endl << setfill(' ');
 
-    cout << setfill(' ') << left << setw(50) << "Total Idle Times for Servers: " << endl << endl;
 }
