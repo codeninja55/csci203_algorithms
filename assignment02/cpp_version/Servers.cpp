@@ -37,17 +37,16 @@ void Servers::add_customer(Customer &c, double start_time,  double finish_time)
 {
     int next_avail_idx = dequeue();
     if (next_avail_idx != -1) {
-        Server s = _servers[next_avail_idx];
         c.server_idx = next_avail_idx;
 
-        double last_finish_time = s.finish_time;
+        double last_finish_time = _servers[next_avail_idx].finish_time;
 
-        s.total_idle_time += (last_finish_time - start_time);
-        s.total_service_time += (finish_time - start_time);  // this service time accumulated
+        _servers[next_avail_idx].total_idle_time += (last_finish_time - start_time);
+        _servers[next_avail_idx].total_service_time += (finish_time - start_time);  // this service time accumulated
 
-        s.finish_time = finish_time;
-        s.last_ev_time = start_time;
-        s.count++;
+        _servers[next_avail_idx].finish_time = finish_time;
+        _servers[next_avail_idx].last_ev_time = start_time;
+        _servers[next_avail_idx].count++;
     }
 }
 
