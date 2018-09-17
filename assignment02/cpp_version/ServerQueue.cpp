@@ -16,7 +16,7 @@ ServerQueue::ServerQueue(int size, char *name) : _capacity(size), _head(-1), _ta
 
 void ServerQueue::enqueue(Customer c)
 {
-    if (_tail == _capacity - 1)
+    if (_n_customers == _capacity - 1)
         std::cout << "Enqueue: " << _name << "Server_Q is full." << std::endl;
     else {
         if (_head == -1)

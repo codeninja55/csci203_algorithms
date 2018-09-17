@@ -70,8 +70,8 @@ int main(int argc, const char* argv[])
     Servers s_servers = Servers(n_s_servers, s_name);  // wrapper class for array of secondary server structs
 
     // Initialise queues
-    ServerQueue p_server_q = ServerQueue(5000, p_name);  // FIFO queue - waiting to be served by a p server
-    ServerQueue s_server_q = ServerQueue(5000, s_name);  // FIFO queue - waiting to be served by a s server
+    ServerQueue p_server_q = ServerQueue(2000, p_name);  // FIFO queue - waiting to be served by a p server
+    ServerQueue s_server_q = ServerQueue(2000, s_name);  // FIFO queue - waiting to be served by a s server
     EventQueue event_q = EventQueue(2000);  // Priority queue implemented as a heap with an array - main event queue
 
     // Statistic counters initialisers
@@ -97,7 +97,9 @@ int main(int argc, const char* argv[])
     while (event_q.more_events()) {  // check if there are any more events waiting to be processed
         // the top priority event based on event_time when added
         Event ev = event_q.extract_next_event();
-        cout << "Processing ==> {" << ev.type << "} <ID " << ev.cust.id << "> : Event double: " << ev.ev_time << endl;
+
+        cout << "<ID " << ev.cust.id << "> {Type  " << ev.type << "} ==> Process time: "
+        << ev.ev_time << endl;
 
         /* Events are either:
          *  eCustomerArrived
@@ -145,7 +147,7 @@ int main(int argc, const char* argv[])
 
             case eCustPrimaryFinished:
                 // free up a server in primary server array
-                p_servers.remove_customer(ev.cust.server_id);
+                p_servers.remove_customer(ev.cust.server_idx);
 
                 // TODO: do service time stats
                 total_service_time += (ev.cust.p_service_duration + ev.cust.wait_duration);  // wait_duration only for p
@@ -164,11 +166,9 @@ int main(int argc, const char* argv[])
 
             case eCustSecondaryFinished:
                 // free up a server in secondary server array
-                s_servers.remove_customer(ev.cust.server_id);
-
+                s_servers.remove_customer(ev.cust.server_idx);
                 // TODO: do service time stats
                 if (!event_q.more_events()) last_service_completed = ev.ev_time;
-
                 total_service_time += (ev.cust.s_service_duration + ev.cust.wait_duration);
 
                 break;
@@ -177,8 +177,7 @@ int main(int argc, const char* argv[])
         // Check if there are any secondary servers available to process
         // someone in queue if there is a queue
         if (!s_server_q.is_empty() && s_servers.is_available()) {
-            Customer waiting_cust;
-            waiting_cust = s_server_q.dequeue();
+            Customer waiting_cust = s_server_q.dequeue();
 
             waiting_cust.wait_duration = ev.ev_time - waiting_cust.s_queue_time;
             double s_server_finish_time = ev.ev_time + waiting_cust.s_service_duration;
@@ -192,8 +191,7 @@ int main(int argc, const char* argv[])
         // Check if there are any primary servers available to process
         // someone in queue if there is a queue
         if (!p_server_q.is_empty() && p_servers.is_available()) {
-            Customer waiting_cust;
-            waiting_cust = p_server_q.dequeue();
+            Customer waiting_cust = p_server_q.dequeue();
 
             waiting_cust.wait_duration = ev.ev_time - waiting_cust.p_queue_time;
             double p_server_finish_time = ev.ev_time + waiting_cust.p_service_duration;
@@ -226,7 +224,7 @@ void print_statistics()
     int n_total_cust = GLOBAL_CUST_ID - 1;
     cout << "\n\n|=======| Assignment 02 -- Simulation Statistics  |=======|" << endl << endl;
 
-    cout << left << setfill('.') << setw(50) << "Total Number of People Served:" << " "
+    cout << setprecision(8) << left << setfill('.') << setw(50) << "Total Number of People Served:" << " "
          << n_total_cust << endl;
     cout << left << setw(50) << "Time Last Service Completed:" << " "
          << last_service_completed << endl << endl;
