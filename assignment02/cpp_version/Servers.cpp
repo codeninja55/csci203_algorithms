@@ -10,62 +10,87 @@
 #include "Servers.h"
 using namespace std;
 
-Servers::Servers(int size, char *name) : _capacity(size), _name(name)
+// Constructor to create an _idle[] array of int index for idle servers
+// and a Server[] array to store each server.
+Servers::Servers(unsigned int size, char *name) : _capacity(size), _name(name), _n_idle_servers(0)
 {
-    _idle = new Server[size];
+    _head = _tail = -1;
+    _servers = new Server[_capacity];
+    _idle = new int[_capacity];
+
+    // loop through and initialise each server to _server[] array and
+    // enqueue their index int to the _idle[] FIFO queue
     int i;
     for (i = 0; i < _capacity; i++) {
         Server new_server;
-        new_server.id = i;
-        new_server.busy = false;
+        new_server.idx = i;
+        new_server.count = 0;
         new_server.finish_time = new_server.last_ev_time = new_server.total_idle_time = 0;
-        new_server.last_cust_served = new_server.count = 0;
-        _idle[i] = new_server;
+        enqueue(new_server.idx);
+        _servers[i] = new_server;
     }
 }
 
+// dequeue a server from the next available server from _idle[] queue
+// and add the customer to the Server struct from the _server[]
 void Servers::add_customer(Customer &c, double start_time,  double finish_time)
 {
-    int server_id = next_server();
-    if (server_id != -1) {
-        c.server_id = server_id;
-        _idle[server_id].busy = true;
+    int next_avail_idx = dequeue();
+    if (next_avail_idx != -1) {
+        Server s = _servers[next_avail_idx];
+        c.server_idx = next_avail_idx;
 
-        // TODO
-        double last_finish_time = _idle[server_id].finish_time;
+        double last_finish_time = s.finish_time;
 
-        _idle[server_id].total_idle_time += (last_finish_time - start_time);
-        _idle[server_id].total_service_time += (finish_time - start_time);  // this service time accumulated
+        s.total_idle_time += (last_finish_time - start_time);
+        s.total_service_time += (finish_time - start_time);  // this service time accumulated
 
-        _idle[server_id].finish_time = finish_time;
-        _idle[server_id].last_ev_time = start_time;
-        _idle[server_id].count++;
-        _idle[server_id].last_cust_served = c.id;
+        s.finish_time = finish_time;
+        s.last_ev_time = start_time;
+        s.count++;
     }
 }
 
-void Servers::remove_customer(int server_id)
+// implementation for the dequeue of an index int from the _idle[] queue
+int Servers::dequeue()
 {
-    _idle[server_id].busy = false;
-    _idle[server_id].finish_time = 0;
-    // _idle[server_id].last_cust_served = 0;  // leave this commented to see last cust_id served
+    int s_id;
+    if (_head == -1) {
+        cout << "No Servers Available" << endl;
+        return -1;
+    } else {
+        s_id = _idle[_head];
+        _head++;
+        if (_head > _tail)
+            _head = _tail = -1;
+        _n_idle_servers--;
+        return s_id;
+    }
 }
 
-int Servers::next_server()
+// add the server index int back to the _idle[] FIFO queue
+void Servers::remove_customer(int s_idx)
 {
-    int i;
-    for (i = 0; i < _capacity; i++ )
-        if (!_idle[i].busy) return i;
-    return -1;
+    _servers[s_idx].finish_time = 0;
+    enqueue(s_idx);  // add server to idle queue
 }
 
-bool Servers::is_available()
+// FIFO enqueue implementation for an _idle[] int array of server indexes
+void Servers::enqueue(int s_idx)
 {
-    int i;
-    for (i=0; i < _capacity; i++)
-        if (!_idle[i].busy) return true;
-    return false;
+    if (_n_idle_servers == _capacity)
+        cout << "Too many servers. \n";
+    else {
+        if (_head == -1)
+            _head = 0;
+        _tail++;
+        _idle[_tail] = s_idx;
+        _n_idle_servers++;
+    }
 }
+
+// returns whether _idle[] queue is not empty
+bool Servers::is_available() { return _n_idle_servers != 0; }
 
 void Servers::display_server_statistics()
 {
@@ -77,9 +102,9 @@ void Servers::display_server_statistics()
          << setw(21) << " Total Service Time |" << endl;
     cout << "|--------|-----------------|--------------------|" << endl;
     for (i = 0; i < _capacity; i++) {
-        cout << left <<"|    " << setw(3) << _idle[i].id + 1 << " |"
-             << right <<  setw(16) << _idle[i].total_idle_time << " |"
-             << setw(19) << _idle[i].total_service_time << " |" << endl;
+        cout << left << setprecision(7) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
+             << right << setprecision(7) << setw(16) << _servers[i].total_idle_time << " |"
+             << setprecision(7) << setw(19) << _servers[i].total_service_time << " |" << endl;
     }
     cout << "|--------|-----------------|--------------------|" << endl;
     cout << endl;

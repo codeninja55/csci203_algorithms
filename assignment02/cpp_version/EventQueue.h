@@ -17,12 +17,12 @@ enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryF
 struct Customer {
     double arrival_time, p_service_duration, s_service_duration;
     double wait_duration, p_queue_time, s_queue_time;
-    int id, server_id;
+    int id, server_idx;
 };
 
 struct Event {
     EventType type;  // type of event
-    double ev_time;  // snapshot time of event
+    double ev_time;  // snapshot time of event to process
     Customer cust;  // customer for event
 };
 
