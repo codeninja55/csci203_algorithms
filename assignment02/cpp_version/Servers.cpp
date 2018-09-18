@@ -104,9 +104,9 @@ void Servers::display_server_statistics(double last_service_time)
         // Final update
         _servers[i].total_idle_time += last_service_time - _servers[i].finish_time;
 
-        cout << left << setprecision(5) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
-             << right << setprecision(5) << setw(16) << _servers[i].total_idle_time << " |"
-             << setprecision(5) << setw(19) << _servers[i].total_service_time << " |" << endl;
+        cout << left << fixed << setprecision(4) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
+             << right << setw(16) << _servers[i].total_idle_time << " |"
+             << setw(19) << _servers[i].total_service_time << " |" << endl;
     }
     cout << "|--------|-----------------|--------------------|" << endl;
     cout << endl;
