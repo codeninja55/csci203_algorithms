@@ -62,7 +62,7 @@ int main(int argc, const char* argv[])
     }
 
     // Initialise servers from read in file parameters
-    int n_p_servers, n_s_servers;
+    unsigned int n_p_servers, n_s_servers;
     fin >> n_p_servers >> n_s_servers;
     char p_name[] = "Primary";
     char s_name[] = "Secondary";
@@ -132,7 +132,7 @@ int main(int argc, const char* argv[])
                     }
                 }
 
-                if (p_servers.is_available()) {  // p server in array with busy flag set to false
+                if (p_servers.is_available()) {  // p server in array to be dequeue'd
                     double p_service_finish_time = ev.cust.arrival_time + ev.cust.p_service_duration;
                     p_servers.add_customer(ev.cust, ev.ev_time, p_service_finish_time);
                     event_q.add_event(eCustPrimaryFinished, p_service_finish_time, ev.cust);
@@ -204,8 +204,8 @@ int main(int argc, const char* argv[])
     }
 
     print_statistics();
-    p_servers.display_server_statistics();
-    s_servers.display_server_statistics();
+    p_servers.display_server_statistics(last_service_completed);
+    s_servers.display_server_statistics(last_service_completed);
 
 
     /* TODO: Output, to standard output will consist of the following data:

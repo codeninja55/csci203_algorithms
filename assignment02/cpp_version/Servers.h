@@ -15,7 +15,7 @@ struct Server {
     int idx;
     // stats
     int count;
-    double last_ev_time, finish_time, total_idle_time, total_service_time;
+    double finish_time, total_idle_time, total_service_time;
 };
 
 typedef Server Server;
@@ -28,7 +28,8 @@ class Servers {
         void enqueue(int s_idx);
         int dequeue();  // dequeue server
         bool is_available();
-        void display_server_statistics();
+        void calculate_idle_times(double current_time);
+        void display_server_statistics(double last_service_time);
     private:
         Server *_servers;
         int *_idle;

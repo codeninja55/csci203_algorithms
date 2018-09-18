@@ -25,7 +25,7 @@ Servers::Servers(unsigned int size, char *name) : _capacity(size), _name(name), 
         Server new_server;
         new_server.idx = i;
         new_server.count = 0;
-        new_server.finish_time = new_server.last_ev_time = new_server.total_idle_time = 0;
+        new_server.finish_time = new_server.total_idle_time = 0;
         enqueue(new_server.idx);
         _servers[i] = new_server;
     }
@@ -35,17 +35,18 @@ Servers::Servers(unsigned int size, char *name) : _capacity(size), _name(name), 
 // and add the customer to the Server struct from the _server[]
 void Servers::add_customer(Customer &c, double start_time,  double finish_time)
 {
+    // calculate_idle_times(start_time);
     int next_avail_idx = dequeue();
     if (next_avail_idx != -1) {
         c.server_idx = next_avail_idx;
 
-        double last_finish_time = _servers[next_avail_idx].finish_time;
-
-        _servers[next_avail_idx].total_idle_time += (last_finish_time - start_time);
-        _servers[next_avail_idx].total_service_time += (finish_time - start_time);  // this service time accumulated
+        // stats for each server
+        // this service time accumulated
+        _servers[next_avail_idx].total_service_time += (finish_time - start_time);
+        // last time they served someone minus starting time for this event
+        _servers[next_avail_idx].total_idle_time += start_time - _servers[next_avail_idx].finish_time;
 
         _servers[next_avail_idx].finish_time = finish_time;
-        _servers[next_avail_idx].last_ev_time = start_time;
         _servers[next_avail_idx].count++;
     }
 }
@@ -70,7 +71,6 @@ int Servers::dequeue()
 // add the server index int back to the _idle[] FIFO queue
 void Servers::remove_customer(int s_idx)
 {
-    _servers[s_idx].finish_time = 0;
     enqueue(s_idx);  // add server to idle queue
 }
 
@@ -91,19 +91,22 @@ void Servers::enqueue(int s_idx)
 // returns whether _idle[] queue is not empty
 bool Servers::is_available() { return _n_idle_servers != 0; }
 
-void Servers::display_server_statistics()
+void Servers::display_server_statistics(double last_service_time)
 {
     int i;
-    cout << "Idle times for " << _name << " servers:" << endl;
+    cout << "Statistics for " << _name << " servers:" << endl;
     cout << "|--------|-----------------|--------------------|" << endl;
     cout << left << setw(10) << "| Server |"
          << setw(18) << " Total Idle Time |"
          << setw(21) << " Total Service Time |" << endl;
     cout << "|--------|-----------------|--------------------|" << endl;
     for (i = 0; i < _capacity; i++) {
-        cout << left << setprecision(7) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
-             << right << setprecision(7) << setw(16) << _servers[i].total_idle_time << " |"
-             << setprecision(7) << setw(19) << _servers[i].total_service_time << " |" << endl;
+        // Final update
+        _servers[i].total_idle_time += last_service_time - _servers[i].finish_time;
+
+        cout << left << setprecision(5) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
+             << right << setprecision(5) << setw(16) << _servers[i].total_idle_time << " |"
+             << setprecision(5) << setw(19) << _servers[i].total_service_time << " |" << endl;
     }
     cout << "|--------|-----------------|--------------------|" << endl;
     cout << endl;
