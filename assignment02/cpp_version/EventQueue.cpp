@@ -50,8 +50,6 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     }
 }
 
-Event EventQueue::peek_next_event() { return _q[0]; }
-
 Event EventQueue::extract_next_event()
 {
     if (_n_events <= 0)

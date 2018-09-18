@@ -16,7 +16,7 @@ enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryF
 
 struct Customer {
     double arrival_time, p_service_duration, s_service_duration;
-    double wait_duration, p_queue_time, s_queue_time;
+    double wait_duration, cust_queued_time;
     int server_idx;
 };
 
@@ -34,12 +34,10 @@ class EventQueue {
         explicit EventQueue(int size);  // initialiser
         void add_event(EventType ev_type, double ev_time, Customer &cust);
         Event extract_next_event();
-        Event peek_next_event();
         bool more_events();
     private:
         void min_heapify(int i);
-        int _n_events;
-        int _capacity;
+        int _n_events, _capacity;
         Event *_q;
 };
 
