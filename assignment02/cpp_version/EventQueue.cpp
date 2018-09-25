@@ -6,8 +6,7 @@
 * Last modified: 2018.09.12
 *********************************************************************/
 
-#include <iostream>
-#include "EventQueue.h"
+
 
 void swap(Event *A, Event *B);
 
@@ -39,13 +38,16 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
         return;
     }
 
+    if (_n_events == (_capacity / 2)) {
+        Event *tmp;
+        tmp = new Event[_capacity * 2];
+        
+        for ()
+    }
+
     int i = _n_events++;
     Event new_event = { ev_type, ev_time, cust };
     _q[i] =  new_event;
-
-    // TODO: Testing
-    std::cout << "Event {" << ev_type << "} added ==>  : <ID " << cust.id
-              << "> : " << ev_time << std::endl;
 
     // Fix min-heap property
     while (i != 0 && _q[PARENT(i)].ev_time > _q[i].ev_time) {
@@ -53,8 +55,6 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
         i = PARENT(i);
     }
 }
-
-Event EventQueue::peek_next_event() { return _q[0]; }
 
 Event EventQueue::extract_next_event()
 {
@@ -74,17 +74,6 @@ Event EventQueue::extract_next_event()
 }
 
 bool EventQueue::more_events() { return _n_events > 0; }
-
-void EventQueue::display()
-{
-    int i;
-    std::cout << "Event_Q ==> ";
-    for (i = 0; i < _n_events; i++) {
-        std::cout<<"[ {"<<_q[i].type<<"} : <ID " << _q[i].cust.id
-                 << "> : " << _q[i].ev_time <<" ] --> ";
-    }
-    std::cout<<std::endl;
-}
 
 void swap(Event *A, Event *B)
 {

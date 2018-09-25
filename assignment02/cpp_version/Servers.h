@@ -12,28 +12,29 @@
 #include "EventQueue.h"
 
 struct Server {
-    int id;
-    bool busy;
+    int idx;
     // stats
-    int count, last_cust_served;
-    double last_ev_time, finish_time, total_idle_time, total_service_time;
+    int count;
+    double finish_time, total_idle_time, total_service_time;
 };
 
 typedef Server Server;
 
 class Servers {
     public:
-        explicit Servers(int size, char *name);
-        void add_customer(Customer &c, double ev_time, double finish_time);
-        void remove_customer(int server_id);
-        int next_server();
+        explicit Servers(unsigned int size, char *name);  // main initialiser
+        void add_customer(Customer &c, double start_time, double finish_time);
+        void remove_customer(int s_idx);  // enqueue server
+        void enqueue(int s_idx);
+        int dequeue();  // dequeue server
         bool is_available();
-        void display();
-        void display_idle_times();
+        void display_server_statistics(double last_service_time);
     private:
-        Server *_idle;
+        Server *_servers;
+        int *_idle;
         char *_name;
-        int _capacity;
+        int _head, _tail;
+        unsigned int _capacity, _n_idle_servers;
 };
 
 #endif //ASSIGNMENT02_C_VERSION_SERVERS_H
