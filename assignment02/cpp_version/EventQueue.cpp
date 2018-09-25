@@ -6,8 +6,7 @@
 * Last modified: 2018.09.12
 *********************************************************************/
 
-#include <iostream>
-#include "EventQueue.h"
+
 
 void swap(Event *A, Event *B);
 
@@ -37,6 +36,13 @@ void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
     if (_n_events == _capacity - 1) {
         std::cout << "Event queue overflow." << std::endl;
         return;
+    }
+
+    if (_n_events == (_capacity / 2)) {
+        Event *tmp;
+        tmp = new Event[_capacity * 2];
+        
+        for ()
     }
 
     int i = _n_events++;

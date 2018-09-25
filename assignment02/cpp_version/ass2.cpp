@@ -11,22 +11,94 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iomanip>
-#include "EventQueue.h"
-#include "ServerQueue.h"
-#include "Servers.h"
 using namespace std;
 
 /*====================| MACRO DEFINITIONS |====================*/
 #define BUFFER_SZ 50
+#define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
+#define PARENT(i) ( (i-1) / 2 )
+#define LEFT(i) ( (i * 2) + 1 )
+#define RIGHT(i) ( (i * 2) + 2 )
 
 /*====================| STRUCT AND ENUM DEFINITIONS |====================*/
+enum EventType { eCustomerArrived = 0, eCustPrimaryFinished = 1, eCustSecondaryFinished = 2 };
 
+struct Customer {
+    double arrival_time, p_service_duration, s_service_duration;
+    double wait_duration, cust_queued_time;
+    int server_idx;
+};
 
-/*====================| FUNCTION PROTOTYPES |====================*/
-void print_statistics(Servers, Servers, ServerQueue, ServerQueue, EventQueue);
+struct Event {
+    EventType type;  // type of event
+    double ev_time;  // snapshot time of event to process
+    Customer cust;  // customer for event
+};
+
+struct Server {
+    int idx;
+    // stats
+    int count;
+    double finish_time, total_idle_time, total_service_time;
+};
+
+typedef Server Server;
+typedef Event Event;
+typedef Customer Customer;
 
 /*====================| CLASS DEFINITIONS |====================*/
+class EventQueue {
+    public:
+        explicit EventQueue(int size);  // initialiser
+        void add_event(EventType ev_type, double ev_time, Customer &cust);
+        Event extract_next_event();
+        bool more_events();
+    private:
+        void min_heapify(int i);
+        int _n_events, _capacity;
+        Event *_q;
+};
 
+class Servers {
+    public:
+        explicit Servers(unsigned int size, char *name);  // main initialiser
+        void add_customer(Customer &c, double start_time, double finish_time);
+        void remove_customer(int s_idx);  // enqueue server
+        void enqueue(int s_idx);
+        int dequeue();  // dequeue server
+        bool is_available();
+        void display_server_statistics(double last_service_time);
+    private:
+        Server *_servers;
+        int *_idle;
+        char *_name;
+        int _head, _tail;
+        unsigned int _capacity, _n_idle_servers;
+};
+
+class ServerQueue {
+    public:
+        explicit ServerQueue(int size, char *name);
+        void add_waiting_customer(Customer &c, double ev_time);
+        void enqueue(Customer &c);
+        Customer dequeue();
+        Customer next_waiting_customer(double ev_time);
+        void calculate_average_queue_len(double ev_time);
+        bool is_empty();
+        int get_max_q_len() const;
+        double get_avg_queue_len() const;
+        double get_sum_q_len() const;
+        double get_sum_q_len_time() const;
+    private:
+        int _head, _tail, _capacity, _n_customers, _max_q_len;
+        double _sum_q_len, _sum_q_len_time, _prev_q_len_change_time;
+        Customer *serv_q;
+        char *_name;
+};
+
+/*====================| FUNCTION PROTOTYPES |====================*/
+void print_statistics(Servers, Servers, ServerQueue, ServerQueue);
+void swap(Event *A, Event *B);
 
 /*====================| GLOBAL VARIABLE DEFINITIONS |====================*/
 int n_total_cust;
@@ -36,7 +108,7 @@ int p_server_n_cust, s_server_n_cust;
 
 int main(int argc, const char* argv[])
 {
-    cout<<"|===============| CSCI203 Assignment 02 |===============|\n Author: Dinh Che (codeninja55 | dbac496)"<<endl;
+    cout<<"Author: Dinh Che (dbac496 | codeninja55)"<<endl;
 
     char filename[BUFFER_SZ];
     ifstream fin;
@@ -65,9 +137,9 @@ int main(int argc, const char* argv[])
     Servers s_servers = Servers(n_s_servers, s_name);  // wrapper class for array of secondary server structs
 
     // Initialise queues
-    ServerQueue p_server_q = ServerQueue(1000, p_name);  // FIFO queue - waiting to be served by a p server
-    ServerQueue s_server_q = ServerQueue(1000, s_name);  // FIFO queue - waiting to be served by a s server
-    EventQueue event_q = EventQueue(1000);  // Priority queue implemented as a heap with an array - main event queue
+    ServerQueue p_server_q = ServerQueue(2000, p_name);  // FIFO queue - waiting to be served by a p server
+    ServerQueue s_server_q = ServerQueue(2000, s_name);  // FIFO queue - waiting to be served by a s server
+    EventQueue event_q = EventQueue(200);  // Priority queue implemented as a heap with an array - main event queue
 
     // Statistic counters initialisers
     n_total_cust = 0;
@@ -157,8 +229,8 @@ int main(int argc, const char* argv[])
 
                 if (!event_q.more_events()) {
                     last_service_completed = ev.ev_time;
-                    // p_server_q.calculate_average_queue_len(last_service_completed);
-                    // s_server_q.calculate_average_queue_len(last_service_completed);
+                    p_server_q.calculate_average_queue_len(last_service_completed);
+                    s_server_q.calculate_average_queue_len(last_service_completed);
                 }
 
                 break;
@@ -193,13 +265,13 @@ int main(int argc, const char* argv[])
         }
     }
 
-    print_statistics(p_servers, s_servers, p_server_q, s_server_q, event_q);
+    print_statistics(p_servers, s_servers, p_server_q, s_server_q);
 
     cout << "|=======|  Assignment 02 -- Simulation Complete  |=======|" << endl << endl;
     return 0;
 }
 
-void print_statistics(Servers p_servers, Servers s_servers, ServerQueue p_server_q, ServerQueue s_server_q, EventQueue event_q)
+void print_statistics(Servers p_servers, Servers s_servers, ServerQueue p_server_q, ServerQueue s_server_q)
 {
     cout << "\n\n|=======| Assignment 02 -- Simulation Statistics  |=======|" << endl << endl;
 
@@ -246,13 +318,248 @@ void print_statistics(Servers p_servers, Servers s_servers, ServerQueue p_server
 }
 
 /*====================| CLASS: Servers IMPLEMENTATION |====================*/
+// Constructor to create an _idle[] array of int index for idle servers
+// and a Server[] array to store each server.
+Servers::Servers(unsigned int size, char *name) : _capacity(size), _name(name), _n_idle_servers(0)
+{
+    _head = _tail = -1;
+    _servers = new Server[_capacity];
+    _idle = new int[_capacity];
 
+    // loop through and initialise each server to _server[] array and
+    // enqueue their index int to the _idle[] FIFO queue
+    int i;
+    for (i = 0; i < _capacity; i++) {
+        Server new_server;
+        new_server.idx = i;
+        new_server.count = 0;
+        new_server.finish_time = new_server.total_idle_time = 0;
+        enqueue(new_server.idx);
+        _servers[i] = new_server;
+    }
+}
+
+// dequeue a server from the next available server from _idle[] queue
+// and add the customer to the Server struct from the _server[]
+void Servers::add_customer(Customer &c, double start_time,  double finish_time)
+{
+    // calculate_idle_times(start_time);
+    int next_avail_idx = dequeue();
+    if (next_avail_idx != -1) {
+        c.server_idx = next_avail_idx;
+
+        // stats for each server
+        // this service time accumulated
+        _servers[next_avail_idx].total_service_time += (finish_time - start_time);
+        // last time they served someone minus starting time for this event
+        _servers[next_avail_idx].total_idle_time += start_time - _servers[next_avail_idx].finish_time;
+
+        _servers[next_avail_idx].finish_time = finish_time;
+        _servers[next_avail_idx].count++;
+    }
+}
+
+// implementation for the dequeue of an index int from the _idle[] queue
+int Servers::dequeue()
+{
+    int s_id;
+    if (_head == -1) {
+        cout << "No Servers Available" << endl;
+        return -1;
+    } else {
+        s_id = _idle[_head];
+        _head++;
+        if (_head > _tail)
+            _head = _tail = -1;
+        _n_idle_servers--;
+        return s_id;
+    }
+}
+
+// add the server index int back to the _idle[] FIFO queue
+void Servers::remove_customer(int s_idx)
+{
+    enqueue(s_idx);  // add server to idle queue
+}
+
+// FIFO enqueue implementation for an _idle[] int array of server indexes
+void Servers::enqueue(int s_idx)
+{
+    if (_n_idle_servers == _capacity)
+        cout << "Too many servers. \n";
+    else {
+        if (_head == -1)
+            _head = 0;
+        _tail++;
+        _idle[_tail] = s_idx;
+        _n_idle_servers++;
+    }
+}
+
+// returns whether _idle[] queue is not empty
+bool Servers::is_available() { return _n_idle_servers != 0; }
+
+void Servers::display_server_statistics(double last_service_time)
+{
+    int i;
+    cout << "Statistics for " << _name << " servers:" << endl;
+    cout << "|--------|-----------------|--------------------|" << endl;
+    cout << left << setw(10) << "| Server |"
+         << setw(18) << " Total Idle Time |"
+         << setw(21) << " Total Service Time |" << endl;
+    cout << "|--------|-----------------|--------------------|" << endl;
+    for (i = 0; i < _capacity; i++) {
+        // Final update
+        _servers[i].total_idle_time += last_service_time - _servers[i].finish_time;
+
+        cout << left << fixed << setprecision(5) << "|    " << setw(3) << _servers[i].idx + 1 << " |"
+             << right << setw(16) << _servers[i].total_idle_time << " |"
+             << setw(19) << _servers[i].total_service_time << " |" << endl;
+    }
+    cout << "|--------|-----------------|--------------------|" << endl;
+    cout << endl;
+}
 
 /*====================| CLASS: ServerQueue IMPLEMENTATION |====================*/
+ServerQueue::ServerQueue(int size, char *name) : _capacity(size), _head(-1), _tail(-1), _n_customers(0), _name(name)
+{
+    _max_q_len = 0;
+    _sum_q_len = _sum_q_len_time = _prev_q_len_change_time = 0;
+    serv_q = new Customer[_capacity];
+}
 
+void ServerQueue::add_waiting_customer(Customer &c, double ev_time)
+{
+    calculate_average_queue_len(ev_time);
+    enqueue(c);
+    _max_q_len = MAX(_max_q_len, _n_customers);
+}
+
+void ServerQueue::calculate_average_queue_len(double ev_time)
+{
+    // current_time - previous time length
+    double q_len_delta_time = ev_time - _prev_q_len_change_time;  // last time the queue was changed
+    _sum_q_len += q_len_delta_time * _n_customers;
+    _sum_q_len_time += q_len_delta_time;
+    _prev_q_len_change_time = ev_time;  // save the snapshot change time before enqueue/dequeue called
+}
+
+void ServerQueue::enqueue(Customer &c)
+{
+    if (_n_customers == _capacity - 1)
+        std::cout << "Enqueue: " << _name << "Server_Q is full." << std::endl;
+    else {
+        if (_head == -1)
+            _head = 0;
+        _tail++;
+        serv_q[_tail] = c;
+        _n_customers++;
+    }
+}
+
+Customer ServerQueue::next_waiting_customer(double ev_time)
+{
+    calculate_average_queue_len(ev_time);
+    return dequeue();
+}
+
+Customer ServerQueue::dequeue()
+{
+    Customer cust;
+    if (_head == -1) {
+        std::cout << "Dequeue: " << _name << "_Server_Q is empty." << std::endl;
+    } else {
+        cust = serv_q[_head];
+        _head++;
+        if (_head > _tail)
+            _head = _tail = -1;
+        _n_customers--;
+        return cust;
+    }
+}
+
+int ServerQueue::get_max_q_len() const { return _max_q_len; }
+
+double ServerQueue::get_avg_queue_len() const { return _sum_q_len / _sum_q_len_time; }
+
+double ServerQueue::get_sum_q_len() const { return _sum_q_len; }
+
+double ServerQueue::get_sum_q_len_time() const { return _sum_q_len_time; }
+
+bool ServerQueue::is_empty() { return _head == -1; }
 
 /*====================| CLASS: EventQueue IMPLEMENTATION |====================*/
+EventQueue::EventQueue(int size) : _capacity(size), _n_events(0)
+{
+    _q = new Event[_capacity];
+}
 
+void EventQueue::min_heapify(int i)
+{
+    int smallest = i;
+
+    if (LEFT(i) <= _n_events && _q[LEFT(i)].ev_time < _q[i].ev_time)
+        smallest = LEFT(i);
+
+    if (RIGHT(i) <= _n_events && _q[RIGHT(i)].ev_time < _q[smallest].ev_time)
+        smallest = RIGHT(i);
+
+    if (smallest != i) {
+        swap(&_q[i], &_q[smallest]);
+        min_heapify(smallest);
+    }
+}
+
+void EventQueue::add_event(EventType ev_type, double ev_time, Customer &cust)
+{
+    if (_n_events == _capacity - 1) {
+        std::cout << "Event queue overflow." << std::endl;
+        return;
+    }
+
+    if (_n_events == (_capacity / 2)) {
+        Event *tmp = _q;
+        _q = new Event[_capacity * 2];
+
+        int i;
+        for (i = 0; i < _capacity; i++) { _q[i] = tmp[i]; }
+        delete[] tmp;
+    }
+
+    int i = _n_events++;
+    Event new_event = { ev_type, ev_time, cust };
+    _q[i] =  new_event;
+
+    // Fix min-heap property
+    while (i != 0 && _q[PARENT(i)].ev_time > _q[i].ev_time) {
+        swap(&_q[i], &_q[PARENT(i)]);
+        i = PARENT(i);
+    }
+}
+
+Event EventQueue::extract_next_event()
+{
+    if (_n_events <= 0)
+        std::cout << "Event Queue underflow."<< std::endl;
+
+    if (_n_events == 1) {
+        _n_events--;
+        return _q[0];
+    }
+
+    Event next = _q[0];
+    _q[0] = _q[_n_events - 1];
+    _n_events--;
+    min_heapify(0);
+    return next;
+}
+
+bool EventQueue::more_events() { return _n_events > 0; }
 
 /*====================| UTILITY FUNCTION IMPLEMENTATIONS |====================*/
-
+void swap(Event *A, Event *B)
+{
+    Event temp = *A;
+    *A = *B;
+    *B = temp;
+}
