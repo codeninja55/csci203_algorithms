@@ -9,4 +9,4 @@ set(CMAKE_CXX_STANDARD 98)
 set(dir ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/ex07/")
 
-add_executable(ex7 helper.h helper.c ex07/cpp_version/queue.cpp ex07/cpp_version/queue.h ex07/cpp_version/ex7.cpp ex07/cpp_version/ex7.h)
+add_executable(ex7 helper.h helper.c ex07/cpp_version/queue.h ex07/cpp_version/ex7.cpp ex07/cpp_version/ex7.h)
