@@ -9,31 +9,31 @@
 #include <iostream>
 // #include "queue.h"
 
-template<typename T>
+template<class T>
 Queue<T>::Queue(): _head(-1), _tail(-1), _capacity(2), n_items(0)
 {
     items = new T[2];
 }
 
-template<typename T>
+template<class T>
 Queue<T>::Queue(int size): _head(-1), _tail(-1), _capacity(size), n_items(0)
 {
     items = new T[size];
 }
 
-template<typename T>
+template<class T>
 Queue<T>::~Queue()
 {
     delete[] items;
 }
 
-template<typename T>
+template<class T>
 int Queue<T>::is_full() { return (_head == _capacity - 1) ? 1 : 0; }
 
-template<typename T>
+template<class T>
 int Queue<T>::is_empty() { return (_head == -1) ? 1 : 0; }
 
-template<typename T>
+template<class T>
 void Queue<T>::enqueue(T elem)
 {
     if (is_full() == 1) {
@@ -48,7 +48,7 @@ void Queue<T>::enqueue(T elem)
     }
 }
 
-template<typename T>
+template<class T>
 void Queue<T>::probe()
 {
     if (n_items > _capacity / 2) {
@@ -61,7 +61,7 @@ void Queue<T>::probe()
     }
 }
 
-template<typename T>
+template<class T>
 T Queue<T>::dequeue() {
     T ret;
     if (is_empty() == 1) {
@@ -74,7 +74,7 @@ T Queue<T>::dequeue() {
     return ret;
 }
 
-template<typename T>
+template<class T>
 void Queue<T>::print_queue() {
     int i;
     std::cout << "Queue ==> ";
