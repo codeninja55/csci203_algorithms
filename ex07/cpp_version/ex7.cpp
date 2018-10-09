@@ -1,10 +1,16 @@
-/*********************************************************************
-* CSCI203 - Exercise 7
-* ex7.c - main() driver for implementation of Karp-Rabin string search algorithm
-* Author: Dinh Che (codeninja55) | andrew at codeninja55.me
-* UOW Details: Dinh Che (5721970) | dbac496 at uowmail.edu.au
-* Last modified: 2018.09.24
-*********************************************************************/
+/*******************************************************************************
+* CSCI203 - Exercise 7 | ex7.cpp
+*
+* Purpose: Main driver for implementation of Breadth First Search. Includes
+*          definition and implementation of a Queue template class
+*          using an array.
+*
+* @version: 1.0
+* @date: 2018.09.24
+*
+* @author: Dinh Che (codeninja55) <andrew at codeninja55.me>
+* Student Details: Dinh Che (5721970) <dbac496 at uowmail.edu.au>
+*******************************************************************************/
 
 #include <iostream>
 #include <fstream>
@@ -135,6 +141,9 @@ void set_edge(int f, int t)
     ADJ[t][f] = 1;
 }
 
+/*
+ * A quick method to print the adjacency matrix 
+ */
 void print_matrix()
 {
     int i, j;
