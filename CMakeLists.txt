@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
-project(Exercise08 CXX)
+project(Assignment03 CXX)
 
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/ex08)
-include_directories(${PROJECT_SOURCE_DIR}/ex08/cpp_version)
+include_directories(${PROJECT_SOURCE_DIR}/assignment03)
+include_directories(${PROJECT_SOURCE_DIR}/assignment03/cpp_version)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 98)
 set(dir ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/ex08/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/assignment03/")
 
-add_executable(ex8 helper.h helper.c ex08/cpp_version/ex08.cpp ex08/cpp_version/HashMap.cpp)
+set(
+    SOURCE_FILES
+        assignment03/cpp_version/ass3.cpp
+)
+
+add_executable(ass3 ${SOURCE_FILES})
