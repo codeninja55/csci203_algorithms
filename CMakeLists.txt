@@ -13,6 +13,6 @@ set(
     SOURCE_FILES
         assignment03/cpp_version/ass3.cpp
         assignment03/cpp_version/HashMap.h
-        assignment03/cpp_version/MinHeap.h)
+        assignment03/cpp_version/MinHeap.h assignment03/cpp_version/Test.h)
 
 add_executable(ass3 ${SOURCE_FILES})
