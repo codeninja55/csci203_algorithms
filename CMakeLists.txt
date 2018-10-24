@@ -12,6 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/assignment03/")
 set(
     SOURCE_FILES
         assignment03/cpp_version/ass3.cpp
+        assignment03/cpp_version/HashMap.h
         assignment03/cpp_version/MinHeap.h)
 
 add_executable(ass3 ${SOURCE_FILES})

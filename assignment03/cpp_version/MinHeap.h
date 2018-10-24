@@ -32,7 +32,6 @@ public:
     T get_min() { return HEAP[0]; }           // return the top of the heap
     // void remove(int idx);                  // delete the key stored at the index
 private:
-    long long int hash(T key);
     void probe();
     void swap(T *a, T *b);
     int _capacity;
@@ -44,9 +43,6 @@ template<class T>
 MinHeap<T>::MinHeap(int capacity) : _capacity(capacity), _size(0)
 {
     HEAP = new T[_capacity];
-    // initialise all elements
-    for (int i=0; i < _capacity; i++)
-        HEAP[i] = NULL;
 }
 
 template<class T>
@@ -75,7 +71,7 @@ void MinHeap<T>::insert(T elem)
     MinHeap::probe();
 
     _size++;  // insert at end
-    T idx = _size - 1;
+    int idx = _size - 1;
     HEAP[idx] = elem;
 
     // heapify to re-balance
@@ -102,12 +98,6 @@ T MinHeap<T>::extract()
     MinHeap::min_heapify(0);
 
     return root;
-}
-
-// TODO: may not be necessary
-template<class T>
-long long int MinHeap<T>::hash(T key) {
-    return key % _capacity;
 }
 
 template<class T>
