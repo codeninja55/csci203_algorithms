@@ -23,30 +23,36 @@
 using namespace std;
 
 #define BUFFER_SZ 200
-#define SIZE 100
+#define MAX_SIZE 100
 
-typedef struct Node {
+typedef struct Vertex {
     int id;
     float X;
     float Y;
+    float distance;
 
-    /*friend bool operator>(const Node &lhs, const Node &rhs) {
-
-    }*/
-
-    friend ostream& operator<<(ostream& os, Node const &node) {
-        return os << node.id << ": " << "(" << node.X << ", " << node.Y << ")";
+    friend bool operator>(const Vertex &lhs, const Vertex &rhs) {
+        return lhs.distance > rhs.distance;
     }
-} Node;
+
+    friend bool operator<(const Vertex &lhs, const Vertex &rhs) {
+        return lhs.distance < rhs.distance;
+    }
+
+    friend ostream& operator<<(ostream& os, Vertex const &node) {
+        return os << "{ " << node.id << ": "
+                  << "{ X: " << node.X << ", Y: " << node.Y << ", distance: " << node.distance << "} }";
+    }
+} Vertex;
 
 /* PROTOTYPES */
 void set_edge(int f, int t, float c);
 void print_matrix();
-int* dijkstra(int (*G)[SIZE]);
+float* dijkstra(int start, Vertex * vertex_arr, float (*matrix)[MAX_SIZE]);
 
 /* GLOBALS */
 int n_nodes, n_edges;
-float MATRIX[SIZE][SIZE];
+float MATRIX[MAX_SIZE][MAX_SIZE];
 // MinHeap<Node> Candidate;
 
 int main(int argc, char * argv[])
@@ -84,17 +90,14 @@ int main(int argc, char * argv[])
 
     // number of nodes in graph
     fin >> n_nodes;
-    // MinHeap<Node> Candidate_Q = MinHeap<Node>(n_nodes);
-    // HashMap<int, Node> Nodes_Map = HashMap<int, Node>(n_nodes);
-    Node Nodes_Arr[n_nodes + 1];
+    Vertex vertex_arr[n_nodes + 1];
 
     for (i = 1; i <= n_nodes; i++) {
-        Node new_node;
+        Vertex new_node = {};
         fin >> new_node.id;
         fin >> new_node.X;
         fin >> new_node.Y;
-        Nodes_Arr[new_node.id] = new_node;
-        // Nodes_Map.insert_node(new_node.id, new_node);
+        vertex_arr[new_node.id] = new_node;
     }
 
     // Nodes_Map.display();
@@ -110,9 +113,14 @@ int main(int argc, char * argv[])
         set_edge(from, to, cost);
     }
 
+    int start_node, end_node;
+    fin >> start_node >> end_node;
+    fin.close();
+
     print_matrix();
 
     // Paths from each
+    dijkstra(start_node, vertex_arr, MATRIX);
     dijkstra2(MATRIX, 19);
 
     /*
@@ -124,37 +132,33 @@ int main(int argc, char * argv[])
      * */
 }
 
-/*int* dijkstra(int (*G)[SIZE])
+float* dijkstra(int start, Vertex * vertex_arr, float (*matrix)[MAX_SIZE])
 {
-    int Parents[SIZE], Selected[SIZE], *Distance;
+    int Parents[MAX_SIZE], Selected[MAX_SIZE];
+    float *Distance;
+    MinHeap<Vertex> Candidate = MinHeap<Vertex>(n_nodes);
     int i, vertex;
 
-    Distance = new int[SIZE];  // avoiding local scope issue of Distance
+    Distance = new float[MAX_SIZE];  // avoiding local scope issue of Distance
 
-    for (i = 1; i < SIZE; i++) {
-        Distance[i] = G[1][i];
+    // initialise distances
+    for (i = 1; i <= n_nodes; i++) {
+        Distance[i] = matrix[start][i];
+        // TODO:
+        cout << matrix[start][i] << " ";
         Parents[i] = 1;
     }
+    cout << endl;
 
-    // vertex = shortest_distance(Distance[])
-
-    // while(Candidate[ctr]) {
-
-        // vertex = the index of the minimum D[v] not yet selected
-        // remove v from C
-        // and implicitly add v to S
-
-        *//*
-         * for each w in C do:
-         *      if D[w] > D[w] + G[v][w] then:
-         *          D[w] = min(D[w], D[v] + G[v][w]
-         *          P[w] = v
-         * *//*
-
-        // ctr++;
-    // }
+    // initialise candidate set
+    for (i = 1; i <= n_nodes; i++) {
+        if (start != i) {
+            vertex_arr[i].distance = 1;
+            // Candidate.insert()
+        }
+    }
     return Distance;
-}*/
+}
 
 void set_edge(int f, int t, float c)
 {

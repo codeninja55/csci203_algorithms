@@ -17,56 +17,56 @@
 #include <climits>
 #include <cstdio>
 
-#define SIZE 100
+#define MAX_SIZE 100
 #define nodes 20
 
-void dijkstra2(float graph[SIZE][SIZE], int src);
-int shortest_distance(const float *D, const bool *path);
+void dijkstra2(float graph[MAX_SIZE][MAX_SIZE], int src);
+int shortest_distance(const float *D, const bool *visited);
 void print_dijkstra(float dist[], int n);
 
-void dijkstra2(float graph[SIZE][SIZE], int src)
+void dijkstra2(float graph[MAX_SIZE][MAX_SIZE], int src)
 {
     int i;
-    float distance[SIZE];
-    bool path[SIZE];  // path[i] will be true if vertex i is included in the shortest path
+    float distance[MAX_SIZE];
+    bool visited[MAX_SIZE];  // visited[i] will be true if vertex i is included in the shortest visited
 
-    // Initialize all distances as INFINITE and path to be false
-    for (i = 0; i < SIZE; i++) {
+    // Initialize all distances as INFINITE and visited to be false
+    for (i = 0; i < MAX_SIZE; i++) {
         distance[i] = INT_MAX;
-        path[i] = false;
+        visited[i] = false;
     }
 
     // distance of source vertex from itself is always 0
     distance[src] = 0;
 
-    // find the shortest path for all vertices
+    // find the shortest visited for all vertices
     int count;
-    for (count = 0; count < SIZE - 1; count++) {
+    for (count = 0; count < MAX_SIZE - 1; count++) {
         // pick the min distance vertex from the set of vertices not yet processed.
-        int u = shortest_distance(distance, path);
+        int u = shortest_distance(distance, visited);
 
         // mark the picked vertex as processed
-        path[u] = true;
+        visited[u] = true;
 
         // update distance values of the adjacent vertices of the picked vertex
         int v;
-        for (v = 0; v < SIZE; v++) {
-            // update distance[v] only if it is not in the path, there is an edge from u to v,
-            // and total weight of path from src to v through u is smaller than current value
+        for (v = 0; v < MAX_SIZE; v++) {
+            // update distance[v] only if it is not in the visited, there is an edge from u to v,
+            // and total weight of visited from src to v through u is smaller than current value
             // of distance[v]
-            if (!path[v] && graph[u][v] && distance[u] != INT_MAX && distance[u] + graph[u][v] < distance[v])
+            if (!visited[v] && graph[u][v] && distance[u] != INT_MAX && distance[u] + graph[u][v] < distance[v])
                 distance[v] = distance[u] + graph[u][v];
         }
     }
-    print_dijkstra(distance, SIZE);
+    print_dijkstra(distance, MAX_SIZE);
 }
 
-int shortest_distance(const float *D, const bool *path)
+int shortest_distance(const float *D, const bool *visited)
 {
     int idx, min_idx = 0;
     float min = INT_MAX;
-    for (idx = 0; idx < SIZE; idx++) {
-        if (D[idx] <= min && !path[idx]) {
+    for (idx = 0; idx < MAX_SIZE; idx++) {
+        if (D[idx] <= min && !visited[idx]) {
             min = D[idx];
             min_idx = idx;
         }
